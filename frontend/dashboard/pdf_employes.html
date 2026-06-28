@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Rapport Employés</title>
+<style>
+  body { font-family: 'Segoe UI', sans-serif; color: #1a1a2e; margin: 0; padding: 20px; }
+  .header { text-align: center; margin-bottom: 30px; border-bottom: 3px solid #a855f7; padding-bottom: 15px; }
+  .header h1 { font-size: 24px; color: #9333ea; margin-bottom: 5px; }
+  .header p { font-size: 12px; color: #666; }
+  .meta { display: flex; justify-content: space-between; margin-bottom: 20px; font-size: 12px; color: #555; }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  thead { background: #9333ea; color: white; }
+  th { padding: 10px 8px; text-align: left; font-weight: 600; }
+  td { padding: 8px; border-bottom: 1px solid #e5e7eb; }
+  tr:nth-child(even) { background: #faf5ff; }
+  .badge { padding: 3px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+  .badge-green { background: #dcfce7; color: #166534; }
+  .badge-gray { background: #f3f4f6; color: #374151; }
+  .footer { margin-top: 30px; text-align: center; font-size: 11px; color: #999; border-top: 1px solid #e5e7eb; padding-top: 10px; }
+  .total { margin-top: 15px; text-align: right; font-size: 13px; font-weight: 600; color: #9333ea; }
+</style>
+</head>
+<body>
+  <div class="header">
+    <h1>👥 SIGP — Rapport Employés</h1>
+    <p>Liste complète du personnel</p>
+  </div>
+  <div class="meta">
+    <span>Généré le : {{ generated_at|date:"d/m/Y H:i" }}</span>
+    <span>Total employés : {{ employes|length }}</span>
+  </div>
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Nom complet</th>
+        <th>Email</th>
+        <th>Département</th>
+        <th>Poste</th>
+        <th>Statut</th>
+      </tr>
+    </thead>
+    <tbody>
+  {% for emp in employes %}
+  <tr>
+    <td>{{ forloop.counter }}</td>
+
+    <td>{{ emp.prenom }} {{ emp.nom }}</td>
+
+    <td>{{ emp.email }}</td>
+
+    <td>{{ emp.departement.name|default:"—" }}</td>
+
+    <td>{{ emp.poste|default:"—" }}</td>
+
+    <td>
+      {% if emp.statut == 'actif' %}
+        Actif
+      {% else %}
+        {{ emp.statut }}
+      {% endif %}
+    </td>
+
+  </tr>
+  {% empty %}
+  <tr>
+    <td colspan="6" style="text-align:center;">
+      Aucun employé trouvé
+    </td>
+  </tr>
+  {% endfor %}
+</tbody>
+  </table>
+  <div class="total">Total : {{ employes|length }} employé(s)</div>
+  <div class="footer">SIGP — Système Intégré de Gestion du Personnel</div>
+</body>
+</html>

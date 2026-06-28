@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="{{ sys_theme }}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SIGP — Mon Pointage</title>
+  <style>
+    :root, [data-theme="dark"] {
+      --bg-main: #0a0f1e;
+      --bg-sidebar: #0d1220;
+      --bg-card: #111827;
+      --bg-input: #0d1526;
+      --border: #1e2a45;
+      --border-sub: #0f1828;
+      --text: #fff;
+      --text-muted: #8a9bbf;
+      --text-dim: #5a6a8a;
+      --text-dimmer: #3a4a6a;
+      --nav-hover: #151c30;
+            --border: #1e2a45; --text: #ffffff; --text-muted: #5a6a8a;
+
+      --accent: #1a6bff;
+            --welcome-bg: linear-gradient(135deg, #0d2050, #1a3a8a);
+
+    }
+    [data-theme="light"] {
+      --bg-main: #f0f4ff;
+      --bg-sidebar: #ffffff;
+      --bg-card: #ffffff;
+      --bg-input: #f5f7ff;
+      --border: #dde3f0;
+      --border-sub: #e8ecf5;
+      --text: #0d1220;
+      --text-muted: #4a5568;
+      --text-dim: #6b7280;
+      --text-dimmer: #9ca3af;
+      --nav-hover: #f0f4ff;
+      --accent: #1a6bff;
+            --border: #dde3f0; --text: #0a0f1e; --text-muted: #6b7a99;
+
+      --welcome-bg: linear-gradient(135deg, #dce8ff, #c7d8ff);
+
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', sans-serif; background: var(--bg-main); color: var(--text); min-height: 100vh; display: flex; }
+
+    .sidebar { width: 240px; background: var(--bg-sidebar); border-right: 1px solid var(--border); display: flex; flex-direction: column; position: fixed; height: 100vh; z-index: 100; }
+    .sidebar-logo { padding: 1.5rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
+    .logo-icon { width: 40px; height: 40px; background: linear-gradient(135deg, #1a6bff, #0d4fd6); border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .logo-text { font-size: 16px; font-weight: 700; color: var(--text); }
+    .logo-sub { font-size: 10px; color: var(--text-dim); }
+    .sidebar-nav { flex: 1; padding: 1rem 0; overflow-y: auto; }
+    .nav-section-title { font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-dimmer); padding: 0.8rem 1.5rem 0.4rem; }
+    .nav-item { display: flex; align-items: center; gap: 10px; padding: 0.7rem 1.5rem; color: var(--text-muted); text-decoration: none; font-size: 13.5px; transition: all 0.2s; border-left: 3px solid transparent; }
+    .nav-item:hover { background: var(--nav-hover); color: var(--text); border-left-color: var(--accent); }
+    .nav-item.active { background: rgba(26,107,255,0.1); color: var(--accent); border-left-color: var(--accent); font-weight: 500; }
+    .nav-icon { font-size: 16px; width: 20px; text-align: center; }
+     .sidebar-footer { padding: 1rem 1.5rem; border-top: 1px solid var(--border); }
+.user-info { display: flex; align-items: center; gap: 10px; }
+.user-details { flex: 1; min-width: 0; }
+.user-name { font-size: 13px; font-weight: 500; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .user-role { font-size: 11px; color: var(--text-dim); }
+.user-avatar { width: 34px; height: 34px; background: linear-gradient(135deg, #1a6bff, #0d4fd6); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600; color: white; flex-shrink: 0; }
+.btn-logout {
+  width: 32px; height: 32px; flex-shrink: 0;
+  background: rgba(220,53,69,0.08);
+  border: 1px solid rgba(220,53,69,0.15);
+  border-radius: 8px; color: #f87171;
+  display: flex; align-items: center; justify-content: center;
+  text-decoration: none; transition: all 0.2s;
+}
+.btn-logout:hover { background: rgba(220,53,69,0.2); border-color: rgba(220,53,69,0.3); color: #ff6b7a; transform: scale(1.05); }
+
+    .main { margin-left: 240px; flex: 1; display: flex; flex-direction: column; }
+    .topbar { background: var(--bg-sidebar); border-bottom: 1px solid var(--border); padding: 0 2rem; height: 60px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; }
+    .topbar-title { font-size: 16px; font-weight: 600; color: var(--text); }
+    .topbar-sub { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
+    .live-clock { font-size: 22px; font-weight: 700; color: var(--accent); font-family: 'Courier New', monospace; letter-spacing: 2px; }
+    .live-date { font-size: 11px; color: var(--text-dim); text-align: right; }
+
+    .content { padding: 2rem; flex: 1; }
+
+    .welcome-card { background: var(--welcome-bg); border: 1px solid var(--border); border-radius: 16px; padding: 1.8rem 2rem; margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between; }
+    .welcome-left h2 { font-size: 20px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+    .welcome-left p { font-size: 13px; color: var(--text-muted); }
+    .clock-big { font-size: 36px; font-weight: 700; color: var(--accent); font-family: 'Courier New', monospace; letter-spacing: 3px; }
+
+    .pointage-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 1.8rem; margin-bottom: 1.5rem; }
+    .card-title { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+    .card-sub { font-size: 12px; color: var(--text-dim); margin-bottom: 1.5rem; }
+
+    .pointage-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
+    .pointage-btn { border-radius: 14px; padding: 1.5rem 1rem; display: flex; flex-direction: column; align-items: center; gap: 10px; cursor: pointer; border: 1.5px solid; transition: all 0.2s; background: transparent; width: 100%; }
+    .pointage-btn:hover:not(:disabled) { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0,0,0,0.3); }
+    .pointage-btn:active:not(:disabled) { transform: scale(0.97); }
+    .pointage-btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
+
+    .btn-arrivee { border-color: rgba(34,197,94,0.4); color: #4ade80; }
+    .btn-arrivee:hover:not(:disabled) { background: rgba(34,197,94,0.1); border-color: #4ade80; }
+    .btn-depart-pause { border-color: rgba(234,179,8,0.4); color: #facc15; }
+    .btn-depart-pause:hover:not(:disabled) { background: rgba(234,179,8,0.1); border-color: #facc15; }
+    .btn-retour { border-color: rgba(139,92,246,0.4); color: #a78bfa; }
+    .btn-retour:hover:not(:disabled) { background: rgba(139,92,246,0.1); border-color: #a78bfa; }
+    .btn-depart-final { border-color: rgba(239,68,68,0.4); color: #f87171; }
+    .btn-depart-final:hover:not(:disabled) { background: rgba(239,68,68,0.1); border-color: #f87171; }
+
+    .btn-icon { font-size: 30px; }
+    .btn-label { font-size: 13px; font-weight: 600; }
+    .btn-time { font-size: 12px; color: var(--text-dim); min-height: 18px; }
+    .btn-time.recorded { color: #4ade80; font-weight: 500; }
+
+    .progress-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; padding: 1.3rem 1.5rem; margin-bottom: 1.5rem; }
+    .progress-steps { display: flex; align-items: center; gap: 0; margin-top: 1rem; }
+    .step { display: flex; flex-direction: column; align-items: center; flex: 1; }
+    .step-circle { width: 36px; height: 36px; border-radius: 50%; border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 14px; background: var(--bg-input); color: var(--text-dimmer); transition: all 0.3s; }
+    .step-circle.done { background: rgba(34,197,94,0.2); border-color: #4ade80; color: #4ade80; }
+    .step-circle.active { background: rgba(26,107,255,0.2); border-color: var(--accent); color: var(--accent); }
+    .step-label { font-size: 10px; color: var(--text-dim); margin-top: 6px; text-align: center; }
+    .step-line { flex: 1; height: 2px; background: var(--border); margin: 0 -1px; margin-bottom: 22px; transition: background 0.3s; }
+    .step-line.done { background: #4ade80; }
+
+    .summary-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; padding: 1.3rem 1.5rem; }
+    .summary-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-top: 1rem; }
+    .summary-item { text-align: center; }
+    .summary-time { font-size: 20px; font-weight: 700; color: var(--text); font-family: 'Courier New', monospace; }
+    .summary-label { font-size: 11px; color: var(--text-dim); margin-top: 4px; }
+
+    .success-msg { background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.3); border-radius: 10px; padding: 10px 16px; font-size: 13px; color: #4ade80; margin-bottom: 1rem; display: none; }
+  </style>
+</head>
+<body>
+
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon">
+        <svg width="22" height="22" viewBox="0 0 36 36" fill="none">
+          <rect x="4" y="8" width="28" height="3.5" rx="1.75" fill="white"/>
+          <rect x="4" y="16" width="20" height="3.5" rx="1.75" fill="white" opacity="0.7"/>
+          <rect x="4" y="24" width="24" height="3.5" rx="1.75" fill="white" opacity="0.5"/>
+        </svg>
+      </div>
+      <div><div class="logo-text">SIGP RH</div><div class="logo-sub">Espace Employé</div></div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-title">Mon Espace</div>
+      <a class="nav-item" href="/dashboard/employee/"><span class="nav-icon">🏠</span> Accueil</a>
+      <a class="nav-item active" href="/pointage/employee/"><span class="nav-icon">⏱️</span> Mon Pointage</a>
+      <div class="nav-section-title">Congés</div>
+      <a class="nav-item " href="{% url 'employee-leaves' %}"><span class="nav-icon">📅</span> Mes Congés</a>
+      <a class="nav-item" href="/leaves/new/"><span class="nav-icon">➕</span> Demander Congé</a>
+      <div class="nav-section-title">Historique</div>
+      <a class="nav-item" href="/pointage/history/"><span class="nav-icon">📋</span> Historique Pointage</a>
+    </nav>
+    <div class="sidebar-footer">
+  <div class="user-info">
+    <div class="user-avatar">{{ request.user.prenom|first|upper|default:request.user.email|first|upper }}</div>
+    <div class="user-details">
+      <div class="user-name">{{ request.user.prenom }} {{ request.user.nom }}</div>
+      <div class="user-role">Employé</div>
+    </div>
+    <a href="/logout/" class="btn-logout" title="Se déconnecter">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+        <polyline points="16 17 21 12 16 7"/>
+        <line x1="21" y1="12" x2="9" y2="12"/>
+      </svg>
+    </a>
+  </div>
+</div>
+  </div>
+
+  <div class="main">
+    <div class="topbar">
+      <div>
+        <div class="topbar-title">⏱️ Mon Pointage</div>
+        <div class="topbar-sub">Enregistrez vos présences du jour</div>
+      </div>
+      <div style="text-align:right">
+        <div class="live-clock" id="clock">00:00:00</div>
+        <div class="live-date" id="dateDisplay"></div>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <div class="welcome-card">
+        <div class="welcome-left">
+          <h2>{{ request.user.prenom }} {{ request.user.nom }}</h2>
+          <p>Pointage du jour — enregistrez chaque action au bon moment</p>
+        </div>
+        <div class="clock-big" id="clockBig">00:00:00</div>
+      </div>
+
+      <div class="success-msg" id="successMsg">✅ Pointage enregistré avec succès!</div>
+
+      <div class="progress-card">
+        <div class="card-title">📊 Progression du jour</div>
+        <div class="progress-steps">
+          <div class="step">
+            <div class="step-circle" id="step1">1</div>
+            <div class="step-label">Arrivée</div>
+          </div>
+          <div class="step-line" id="line1"></div>
+          <div class="step">
+            <div class="step-circle" id="step2">2</div>
+            <div class="step-label">Départ Pause</div>
+          </div>
+          <div class="step-line" id="line2"></div>
+          <div class="step">
+            <div class="step-circle" id="step3">3</div>
+            <div class="step-label">Retour Pause</div>
+          </div>
+          <div class="step-line" id="line3"></div>
+          <div class="step">
+            <div class="step-circle" id="step4">4</div>
+            <div class="step-label">Départ Final</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="pointage-card">
+        <div class="card-title">⏱️ Enregistrer mon pointage</div>
+        <div class="card-sub">Cliquez sur le bouton correspondant à votre action actuelle</div>
+
+        <div class="pointage-grid">
+
+          <button class="pointage-btn btn-arrivee" id="btn1" onclick="doPointage('arrivee', 1)"
+              {% if pointage and pointage.heure_entree %}disabled{% endif %}>
+
+            <span class="btn-icon">🟢</span>
+            <span class="btn-label">Arrivée</span>
+            <span class="btn-time {% if pointage.heure_entree %}recorded{% endif %}" id="time1">
+              {% if pointage.heure_entree %}✓ {{ pointage.heure_entree|time:"H:i" }}{% else %}Non pointé{% endif %}
+            </span>
+          </button>
+
+          <button class="pointage-btn btn-depart-pause" id="btn2" onclick="doPointage('depart_pause', 2)"
+  {% if not pointage or not pointage.heure_entree or pointage.debut_pause %}disabled{% endif %}>
+            <span class="btn-icon">⏸️</span>
+            <span class="btn-label">Départ Pause</span>
+            <span class="btn-time {% if pointage.debut_pause %}recorded{% endif %}" id="time2">
+              {% if pointage.debut_pause %}✓ {{ pointage.debut_pause|time:"H:i" }}{% else %}En attente{% endif %}
+            </span>
+          </button>
+
+          <button class="pointage-btn btn-retour" id="btn3" onclick="doPointage('retour_pause', 3)"
+  {% if not pointage or not pointage.debut_pause or pointage.retour_pause %}disabled{% endif %}>
+            <span class="btn-icon">🔄</span>
+            <span class="btn-label">Retour Pause</span>
+            <span class="btn-time {% if pointage.retour_pause %}recorded{% endif %}" id="time3">
+              {% if pointage.retour_pause %}✓ {{ pointage.retour_pause|time:"H:i" }}{% else %}En attente{% endif %}
+            </span>
+          </button>
+
+         <button class="pointage-btn btn-depart-final" id="btn4" onclick="doPointage('depart_final', 4)"
+  {% if not pointage or not pointage.retour_pause or pointage.heure_sortie %}disabled{% endif %}>
+            <span class="btn-icon">🔴</span>
+            <span class="btn-label">Départ Final</span>
+            <span class="btn-time {% if pointage.heure_sortie %}recorded{% endif %}" id="time4">
+              {% if pointage.heure_sortie %}✓ {{ pointage.heure_sortie|time:"H:i" }}{% else %}En attente{% endif %}
+            </span>
+          </button>
+
+        </div>
+      </div>
+
+      <div class="summary-card">
+        <div class="card-title">📋 Récapitulatif du jour</div>
+        <div class="summary-grid">
+          <div class="summary-item">
+            <div class="summary-time" id="sum1">{% if pointage.heure_entree %}{{ pointage.heure_entree|time:"H:i" }}{% else %}--:--{% endif %}</div>
+            <div class="summary-label">🟢 Arrivée</div>
+          </div>
+          <div class="summary-item">
+            <div class="summary-time" id="sum2">{% if pointage.debut_pause %}{{ pointage.debut_pause|time:"H:i" }}{% else %}--:--{% endif %}</div>
+            <div class="summary-label">⏸️ Départ Pause</div>
+          </div>
+          <div class="summary-item">
+            <div class="summary-time" id="sum3">{% if pointage.retour_pause %}{{ pointage.retour_pause|time:"H:i" }}{% else %}--:--{% endif %}</div>
+            <div class="summary-label">🔄 Retour Pause</div>
+          </div>
+          <div class="summary-item">
+            <div class="summary-time" id="sum4">{% if pointage.heure_sortie %}{{ pointage.heure_sortie|time:"H:i" }}{% else %}--:--{% endif %}</div>
+            <div class="summary-label">🔴 Départ Final</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // Anti-flash dark mode
+    (function() {
+      const dark = localStorage.getItem('sigp_dark_mode') !== 'false';
+      document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+    })();
+
+    function updateClock() {
+      const now = new Date();
+      const h = String(now.getHours()).padStart(2,'0');
+      const m = String(now.getMinutes()).padStart(2,'0');
+      const s = String(now.getSeconds()).padStart(2,'0');
+      const time = h+':'+m+':'+s;
+      document.getElementById('clock').textContent = time;
+      document.getElementById('clockBig').textContent = time;
+      const days = ['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];
+      const months = ['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'];
+      document.getElementById('dateDisplay').textContent = days[now.getDay()]+' '+now.getDate()+' '+months[now.getMonth()]+' '+now.getFullYear();
+    }
+    updateClock();
+    setInterval(updateClock, 1000);
+
+    function updateSteps() {
+      const times = [
+        document.getElementById('time1').textContent.includes('✓'),
+        document.getElementById('time2').textContent.includes('✓'),
+        document.getElementById('time3').textContent.includes('✓'),
+        document.getElementById('time4').textContent.includes('✓'),
+      ];
+      times.forEach((done, i) => {
+        const circle = document.getElementById('step'+(i+1));
+        if (done) { circle.classList.add('done'); circle.textContent = '✓'; }
+        if (i < 3 && done) document.getElementById('line'+(i+1)).classList.add('done');
+      });
+      const nextStep = times.indexOf(false);
+      if (nextStep !== -1) document.getElementById('step'+(nextStep+1)).classList.add('active');
+    }
+    updateSteps();
+
+    function doPointage(type, step) {
+      const now = new Date();
+      const time = String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+      fetch('/pointage/enregistrer/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+        body: JSON.stringify({ type: type })
+      })
+      .then(r => r.json())
+      .then(data => {
+        if (data.status === 'ok') {
+          const timeEl = document.getElementById('time'+step);
+          timeEl.textContent = '✓ ' + time;
+          timeEl.classList.add('recorded');
+          document.getElementById('sum'+step).textContent = time;
+          document.getElementById('btn'+step).disabled = true;
+          if (step < 4) document.getElementById('btn'+(step+1)).disabled = false;
+          const msg = document.getElementById('successMsg');
+          msg.style.display = 'block';
+          setTimeout(() => msg.style.display = 'none', 3000);
+          updateSteps();
+        }
+      })
+      .catch(() => {});
+    }
+
+    function getCookie(name) {
+      let v = '; '+document.cookie, p = v.split('; '+name+'=');
+      if (p.length === 2) return p.pop().split(';').shift();
+    }
+  </script>
+
+</body>
+</html>

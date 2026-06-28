@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="{{ sys_theme }}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SIGP — Paramètres</title>
+  <style>
+    :root, [data-theme="dark"] {
+      --bg-main: #0a0f1e; --bg-sidebar: #0d1220; --bg-card: #111827;
+      --bg-input: #0d1526; --border: #1e2a45; --border-sub: #0f1828;
+      --text: #fff; --text-muted: #8a9bbf; --text-dim: #5a6a8a;
+      --text-dimmer: #3a4a6a; --nav-hover: #151c30; --accent: #1a6bff;
+    }
+    [data-theme="light"] {
+      --bg-main: #f0f4ff; --bg-sidebar: #ffffff; --bg-card: #ffffff;
+      --bg-input: #f5f7ff; --border: #dde3f0; --border-sub: #e8ecf5;
+      --text: #0d1220; --text-muted: #4a5568; --text-dim: #6b7280;
+      --text-dimmer: #9ca3af; --nav-hover: #f0f4ff; --accent: #1a6bff;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', sans-serif; background: var(--bg-main); color: var(--text); min-height: 100vh; display: flex; }
+
+    /* SIDEBAR */
+    .sidebar { width: 240px; background: var(--bg-sidebar); border-right: 1px solid var(--border); display: flex; flex-direction: column; position: fixed; height: 100vh; z-index: 100; }
+    .sidebar-logo { padding: 1.5rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
+    .logo-icon { width: 40px; height: 40px; background: linear-gradient(135deg, #1a6bff, #0d4fd6); border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .logo-text { font-size: 16px; font-weight: 700; color: var(--text); }
+    .logo-sub { font-size: 10px; color: var(--text-dim); }
+    .sidebar-nav { flex: 1; padding: 1rem 0; overflow-y: auto; }
+    .nav-section-title { font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-dimmer); padding: 0.8rem 1.5rem 0.4rem; }
+    .nav-item { display: flex; align-items: center; gap: 10px; padding: 0.7rem 1.5rem; color: var(--text-muted); text-decoration: none; font-size: 13.5px; transition: all 0.2s; border-left: 3px solid transparent; }
+    .nav-item:hover { background: var(--nav-hover); color: var(--text); border-left-color: var(--accent); }
+    .nav-item.active { background: rgba(26,107,255,0.1); color: var(--accent); border-left-color: var(--accent); font-weight: 500; }
+    .nav-icon { font-size: 16px; width: 20px; text-align: center; }
+    .sidebar-footer { padding: 1rem 1.5rem; border-top: 1px solid var(--border); }
+    .user-info { display: flex; align-items: center; gap: 10px; }
+    .user-details { flex: 1; min-width: 0; }
+    .user-name { font-size: 13px; font-weight: 500; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .user-role { font-size: 11px; color: var(--text-dim); }
+    .user-avatar { width: 34px; height: 34px; background: linear-gradient(135deg, #1a6bff, #0d4fd6); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600; color: white; flex-shrink: 0; }
+    .btn-logout { width: 32px; height: 32px; flex-shrink: 0; background: rgba(220,53,69,0.08); border: 1px solid rgba(220,53,69,0.15); border-radius: 8px; color: #f87171; display: flex; align-items: center; justify-content: center; text-decoration: none; transition: all 0.2s; }
+    .btn-logout:hover { background: rgba(220,53,69,0.2); border-color: rgba(220,53,69,0.3); color: #ff6b7a; transform: scale(1.05); }
+
+    /* MAIN */
+    .main { margin-left: 240px; flex: 1; display: flex; flex-direction: column; }
+    .topbar { background: var(--bg-sidebar); border-bottom: 1px solid var(--border); padding: 0 2rem; height: 60px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; }
+    .topbar-title { font-size: 16px; font-weight: 600; color: var(--text); }
+    .topbar-sub { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
+    .content { padding: 2rem; flex: 1; }
+
+    /* TABS */
+    .tabs { display: flex; gap: 4px; margin-bottom: 1.5rem; background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 4px; width: fit-content; }
+    .tab { padding: 8px 18px; border-radius: 7px; font-size: 13px; cursor: pointer; color: var(--text-muted); transition: all 0.2s; border: none; background: transparent; }
+    .tab.active { background: var(--accent); color: white; font-weight: 500; }
+    .tab:hover:not(.active) { color: var(--text); background: var(--nav-hover); }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    /* CARDS */
+    .section-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; margin-bottom: 1.5rem; }
+    .section-header { padding: 1rem 1.3rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .section-title { font-size: 14px; font-weight: 600; color: var(--text); }
+    .section-sub { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
+
+    /* FORMS */
+    .form-body { padding: 1.3rem; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    label { font-size: 12px; font-weight: 500; color: var(--text-muted); }
+    input, select, textarea { padding: 10px 14px; background: var(--bg-input); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 13px; outline: none; transition: border-color 0.2s; font-family: 'Segoe UI', sans-serif; width: 100%; }
+    input:focus, select:focus, textarea:focus { border-color: var(--accent); }
+    input::placeholder, textarea::placeholder { color: var(--text-dimmer); }
+    select option { background: var(--bg-input); }
+    .btn-save { padding: 9px 20px; background: var(--accent); border: none; border-radius: 8px; color: white; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s; margin-top: 1rem; }
+    .btn-save:hover { background: #0d4fd6; }
+    .btn-add-small { padding: 6px 14px; background: rgba(26,107,255,0.1); border: 1px solid rgba(26,107,255,0.2); border-radius: 7px; color: var(--accent); font-size: 12px; cursor: pointer; transition: all 0.2s; }
+    .btn-add-small:hover { background: var(--accent); color: white; }
+
+    /* TABLE */
+    table { width: 100%; border-collapse: collapse; }
+    th { padding: 0.8rem 1rem; text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-dimmer); border-bottom: 1px solid var(--border); background: var(--bg-sidebar); }
+    td { padding: 0.8rem 1rem; font-size: 13px; color: var(--text-muted); border-bottom: 1px solid var(--border-sub); }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: var(--bg-input); }
+    .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 500; }
+    .badge-paid { background: rgba(34,197,94,0.15); color: #4ade80; }
+    .badge-unpaid { background: rgba(239,68,68,0.15); color: #f87171; }
+    .color-dot { width: 14px; height: 14px; border-radius: 50%; display: inline-block; margin-right: 6px; vertical-align: middle; background: var(--accent); }
+    .actions { display: flex; gap: 6px; }
+    .btn-edit-sm { padding: 4px 8px; background: rgba(26,107,255,0.1); border: 1px solid rgba(26,107,255,0.2); border-radius: 5px; color: var(--accent); font-size: 11px; cursor: pointer; }
+    .btn-del-sm { padding: 4px 8px; background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.2); border-radius: 5px; color: #f87171; font-size: 11px; cursor: pointer; }
+
+    /* TOGGLES */
+    .toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 0.9rem 0; border-bottom: 1px solid var(--border-sub); }
+    .toggle-row:last-child { border-bottom: none; }
+    .toggle-label { font-size: 13px; color: var(--text); }
+    .toggle-desc { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
+    .toggle { width: 42px; height: 24px; background: var(--border); border-radius: 12px; position: relative; cursor: pointer; transition: background 0.2s; border: none; flex-shrink: 0; }
+    .toggle.on { background: var(--accent); }
+    .toggle::after { content: ''; position: absolute; width: 18px; height: 18px; background: white; border-radius: 50%; top: 3px; left: 3px; transition: left 0.2s; }
+    .toggle.on::after { left: 21px; }
+
+    /* MODALS */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 200; align-items: center; justify-content: center; }
+    .modal-overlay.show { display: flex; }
+    .modal { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 1.8rem; width: 100%; max-width: 480px; }
+    .modal-title { font-size: 16px; font-weight: 600; color: var(--text); margin-bottom: 1.2rem; }
+    .modal-actions { display: flex; gap: 1rem; margin-top: 1.3rem; }
+    .btn-cancel { padding: 9px 20px; background: transparent; border: 1px solid var(--border); border-radius: 8px; color: var(--text-muted); font-size: 13px; cursor: pointer; }
+
+    .alert-success { background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.3); border-radius: 10px; padding: 10px 16px; font-size: 13px; color: #4ade80; margin-bottom: 1rem; }
+
+    /* AVERTISSEMENTS ADMIN */
+    .avert-admin-list { display: flex; flex-direction: column; }
+    .avert-admin-row { border-bottom: 1px solid var(--border-sub); padding: 1.1rem 1.3rem; transition: opacity 0.2s; }
+    .avert-admin-row:last-child { border-bottom: none; }
+    .avert-justified { opacity: 0.75; }
+    .avert-admin-header { display: flex; align-items: center; gap: 12px; }
+    .avert-emp-avatar { width: 36px; height: 36px; background: linear-gradient(135deg,#1a6bff,#0d4fd6); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: white; flex-shrink: 0; }
+    .avert-emp-info { flex: 1; min-width: 0; }
+    .avert-emp-name { font-size: 13px; font-weight: 600; color: var(--text); }
+    .avert-emp-meta { font-size: 11px; color: var(--text-dim); margin-top: 1px; }
+    .badge-justified { font-size: 10px; font-weight: 700; background: rgba(34,197,94,0.15); color: #4ade80; border: 1px solid rgba(34,197,94,0.3); padding: 3px 10px; border-radius: 20px; flex-shrink: 0; }
+    .badge-pending-warn { font-size: 10px; font-weight: 700; background: rgba(239,68,68,0.1); color: #f87171; border: 1px solid rgba(239,68,68,0.2); padding: 3px 10px; border-radius: 20px; flex-shrink: 0; }
+    .badge-refusee { font-size: 10px; font-weight: 700; background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.3); padding: 3px 10px; border-radius: 20px; flex-shrink: 0; }
+    .avert-toggle-btn { width: 28px; height: 28px; background: var(--bg-input); border: 1px solid var(--border); border-radius: 7px; color: var(--text-dim); cursor: pointer; font-size: 12px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; flex-shrink: 0; }
+    .avert-toggle-btn:hover { border-color: var(--accent); color: var(--text); }
+    .avert-admin-detail { display: none; margin-top: 0.9rem; flex-direction: column; gap: 0.8rem; }
+    .avert-admin-detail.open { display: flex; }
+    .avert-detail-block { display: flex; flex-direction: column; gap: 6px; }
+    .avert-detail-label { font-size: 11px; font-weight: 600; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.8px; }
+    .avert-detail-text { background: var(--bg-input); border: 1px solid var(--border); border-radius: 8px; padding: 0.8rem 1rem; font-size: 13px; color: var(--text-muted); line-height: 1.6; }
+    .avert-justif-block { background: rgba(34,197,94,0.04); border: 1px solid rgba(34,197,94,0.15); border-radius: 10px; padding: 1rem; display: flex; flex-direction: column; gap: 8px; }
+    .avert-justif-label { font-size: 11px; font-weight: 600; color: #4ade80; text-transform: uppercase; letter-spacing: 0.8px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .avert-justif-text { font-size: 13px; color: var(--text-muted); line-height: 1.6; }
+    .avert-doc-link { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; background: rgba(26,107,255,0.1); border: 1px solid rgba(26,107,255,0.2); border-radius: 7px; color: var(--accent); font-size: 12px; text-decoration: none; transition: all 0.2s; width: fit-content; }
+    .avert-doc-link:hover { background: var(--accent); color: white; }
+    .avert-no-justif { font-size: 12px; color: var(--text-dim); font-style: italic; }
+    .avert-refus-block { background: rgba(239,68,68,0.04); border: 1px solid rgba(239,68,68,0.15); border-radius: 10px; padding: 1rem; display: flex; flex-direction: column; gap: 8px; }
+    .avert-refus-label { font-size: 11px; font-weight: 600; color: #f87171; text-transform: uppercase; letter-spacing: 0.8px; }
+    .avert-empty { padding: 3rem; text-align: center; color: var(--text-dim); }
+    .avert-empty-icon { font-size: 32px; margin-bottom: 0.8rem; }
+    .avert-empty-text { font-size: 14px; }
+    .justif-action-btns { display: flex; gap: 8px; margin-top: 4px; }
+    .btn-accept-justif { padding: 7px 16px; background: rgba(34,197,94,0.12); border: 1px solid rgba(34,197,94,0.3); border-radius: 8px; color: #4ade80; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+    .btn-accept-justif:hover { background: #16a34a; color: white; border-color: #16a34a; }
+    .btn-refuse-justif { padding: 7px 16px; background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.25); border-radius: 8px; color: #f87171; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+    .btn-refuse-justif:hover { background: #dc2626; color: white; border-color: #dc2626; }
+    .tag-accepted { font-size: 10px; font-weight: 700; background: rgba(34,197,94,0.15); color: #4ade80; border: 1px solid rgba(34,197,94,0.3); padding: 2px 8px; border-radius: 20px; }
+    .tag-refused { font-size: 10px; font-weight: 700; background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.3); padding: 2px 8px; border-radius: 20px; }
+
+    /* MODAL REFUS */
+    .modal-refus-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 300; align-items: center; justify-content: center; }
+    .modal-refus-overlay.show { display: flex; }
+    .modal-refus { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 1.8rem; width: 100%; max-width: 440px; }
+    .modal-refus-title { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 1rem; }
+    .modal-refus-textarea { width: 100%; padding: 0.8rem 1rem; background: var(--bg-input); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 13px; font-family: inherit; resize: vertical; min-height: 90px; outline: none; transition: border-color 0.2s; }
+    .modal-refus-textarea:focus { border-color: #f87171; }
+    .modal-refus-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 1rem; }
+  </style>
+</head>
+<body>
+
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon">
+        <svg width="22" height="22" viewBox="0 0 36 36" fill="none">
+          <rect x="4" y="8" width="28" height="3.5" rx="1.75" fill="white"/>
+          <rect x="4" y="16" width="20" height="3.5" rx="1.75" fill="white" opacity="0.7"/>
+          <rect x="4" y="24" width="24" height="3.5" rx="1.75" fill="white" opacity="0.5"/>
+        </svg>
+      </div>
+      <div><div class="logo-text">SIGP RH</div><div class="logo-sub">Administration</div></div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-title">Principal</div>
+      <a class="nav-item" href="/dashboard/"><span class="nav-icon">📊</span> Accueil</a>
+      <div class="nav-section-title">Gestion</div>
+      <a class="nav-item" href="/employees/"><span class="nav-icon">👥</span> Employés</a>
+      <a class="nav-item" href="/pointage/"><span class="nav-icon">⏱️</span> Pointage</a>
+      <a class="nav-item" href="/leaves/"><span class="nav-icon">📅</span> Congés</a>
+      <div class="nav-section-title">Rapports</div>
+      <a class="nav-item" href="{% url 'rapports' %}"><span class="nav-icon">📈</span> Rapports</a>
+      <a class="nav-item active" href="{% url 'parametres' %}"><span class="nav-icon">⚙️</span> Paramètres</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <div class="user-avatar">A</div>
+        <div class="user-details">
+          <div class="user-name">{{ request.user.prenom }} {{ request.user.nom }}</div>
+          <div class="user-role">Administrateur</div>
+        </div>
+        <a href="/logout/" class="btn-logout" title="Se déconnecter">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+            <polyline points="16 17 21 12 16 7"/>
+            <line x1="21" y1="12" x2="9" y2="12"/>
+          </svg>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="topbar">
+      <div>
+        <div class="topbar-title">⚙️ Paramètres</div>
+        <div class="topbar-sub">Configuration du système SIGP</div>
+      </div>
+    </div>
+
+    <div class="content">
+
+      {% if messages %}
+        {% for message in messages %}
+        <div class="alert-success">✅ {{ message }}</div>
+        {% endfor %}
+      {% endif %}
+
+      <div class="tabs">
+        <button class="tab active" onclick="showTab('conges', this)">📅 Types de Congés</button>
+        <button class="tab" onclick="showTab('avertissements', this)">⚠️ Avertissements</button>
+        <button class="tab" onclick="showTab('systeme', this)">🔧 Système</button>
+      </div>
+
+      <!-- TAB: TYPES DE CONGES -->
+      <div class="tab-content active" id="tab-conges">
+        <div class="section-card">
+          <div class="section-header">
+            <div>
+              <div class="section-title">📅 Types de Congés</div>
+              <div class="section-sub">Gérer les types et durées des congés</div>
+            </div>
+            <button class="btn-add-small" onclick="showModal('modalConge')">➕ Ajouter</button>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Nom</th><th>Jours Max</th><th>Payé</th><th>Document requis</th><th>Statut</th><th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for lt in leave_types %}
+              <tr>
+                <td><span class="color-dot"></span>{{ lt.name }}</td>
+                <td>{{ lt.max_days }} jours</td>
+                <td>{% if lt.is_paid %}<span class="badge badge-paid">Payé</span>{% else %}<span class="badge badge-unpaid">Non payé</span>{% endif %}</td>
+                <td>{% if lt.requires_document %}✅ Oui{% else %}❌ Non{% endif %}</td>
+                <td>{% if lt.is_active %}<span class="badge badge-paid">Actif</span>{% else %}<span class="badge badge-unpaid">Inactif</span>{% endif %}</td>
+                <td>
+                  <div class="actions">
+                    <a href="javascript:void(0)" class="btn-edit-sm"
+                      onclick="openEditModal('{{ lt.id }}','{{ lt.name }}','{{ lt.max_days }}','{{ lt.is_paid }}','{{ lt.requires_document }}','{{ lt.is_active }}')">✏️</a>
+                    <a href="{% url 'delete-leave-type' lt.id %}" class="btn-del-sm"
+                      onclick="return confirm('Supprimer ce type de congé ?')">🗑️</a>
+                  </div>
+                </td>
+              </tr>
+              {% empty %}
+              <tr><td colspan="6" style="text-align:center;padding:2rem;color:#3a4a6a">Aucun type de congé</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- TAB: AVERTISSEMENTS -->
+      <div class="tab-content" id="tab-avertissements">
+        <div class="section-card">
+          <div class="section-header">
+            <div>
+              <div class="section-title">⚠️ Avertissements envoyés</div>
+              <div class="section-sub">Historique des avertissements et justifications reçues</div>
+            </div>
+          </div>
+          {% if avertissements %}
+          <div class="avert-admin-list">
+            {% for avert in avertissements %}
+            <div class="avert-admin-row {% if avert.justification_statut == 'acceptee' %}avert-justified{% endif %}" id="avert-row-{{ avert.id }}">
+
+              <div class="avert-admin-header">
+                <div class="avert-emp-avatar">{{ avert.employee.prenom|first|upper }}</div>
+                <div class="avert-emp-info">
+                  <div class="avert-emp-name">{{ avert.employee.prenom }} {{ avert.employee.nom }}</div>
+                  <div class="avert-emp-meta">{{ avert.get_motif_display }} &nbsp;·&nbsp; {{ avert.date_envoi|date:"d/m/Y à H:i" }}</div>
+                </div>
+
+                {% if avert.justification_statut == 'acceptee' %}
+                  <span class="badge-justified">✅ Justifié</span>
+                {% elif avert.justification_statut == 'refusee' %}
+                  <span class="badge-refusee">🔄 Refusée</span>
+                {% elif avert.justification_date %}
+                  <span class="badge-justified">📥 En révision</span>
+                {% else %}
+                  <span class="badge-pending-warn">⏳ En attente</span>
+                {% endif %}
+
+                <button class="avert-toggle-btn" onclick="toggleDetail('detail-{{ avert.id }}')" id="chevron-{{ avert.id }}">▼</button>
+              </div>
+
+              <div class="avert-admin-detail" id="detail-{{ avert.id }}">
+
+                <!-- Message envoyé -->
+                <div class="avert-detail-block">
+                  <div class="avert-detail-label">📤 Message envoyé</div>
+                  <div class="avert-detail-text">{{ avert.message }}</div>
+                </div>
+
+                <!-- Justification reçue -->
+                {% if avert.justification_date %}
+                <div class="avert-justif-block">
+                  <div class="avert-justif-label">
+                    📥 Justification reçue — {{ avert.justification_date|date:"d/m/Y à H:i" }}
+                    {% if avert.justification_statut == 'acceptee' %}<span class="tag-accepted">✅ Acceptée</span>
+                    {% elif avert.justification_statut == 'refusee' %}<span class="tag-refused">❌ Refusée</span>
+                    {% endif %}
+                  </div>
+                  {% if avert.justification_message %}
+                    <div class="avert-justif-text">{{ avert.justification_message }}</div>
+                  {% endif %}
+                  {% if avert.justification_document %}
+                    <a href="{{ avert.justification_document.url }}" target="_blank" class="avert-doc-link">
+                      📎 Voir le document joint
+                    </a>
+                  {% endif %}
+                  {% if not avert.justification_statut %}
+                  <div class="justif-action-btns">
+                    <button class="btn-accept-justif" onclick="traiterJustif('{{ avert.id }}', 'accepter')">✅ Accepter</button>
+                    <button class="btn-refuse-justif" onclick="openRefusModal('{{ avert.id }}')">❌ Refuser</button>
+                  </div>
+                  {% endif %}
+                </div>
+
+                {% elif avert.justification_statut == 'refusee' %}
+                <div class="avert-refus-block">
+                  <div class="avert-refus-label">❌ Justification refusée — en attente d'une nouvelle réponse</div>
+                  {% if avert.justification_refus_motif %}
+                    <div class="avert-justif-text">Motif du refus : {{ avert.justification_refus_motif }}</div>
+                  {% endif %}
+                </div>
+
+                {% else %}
+                <div class="avert-no-justif">Aucune justification soumise pour le moment.</div>
+                {% endif %}
+
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+          {% else %}
+          <div class="avert-empty">
+            <div class="avert-empty-icon">📭</div>
+            <div class="avert-empty-text">Aucun avertissement envoyé</div>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- TAB: SYSTEME -->
+      <div class="tab-content" id="tab-systeme">
+        <div class="section-card">
+          <div class="section-header">
+            <div>
+              <div class="section-title">🔧 Paramètres Système</div>
+              <div class="section-sub">Configuration de votre espace</div>
+            </div>
+          </div>
+          <div class="form-body">
+            <div class="toggle-row">
+              <div>
+                <div class="toggle-label">🌙 Dark Mode</div>
+                <div class="toggle-desc">Activer le mode sombre</div>
+              </div>
+              <button type="button" class="toggle" id="darkToggle" onclick="toggleDark(this)"></button>
+            </div>
+            <div style="margin-top:1.5rem;padding-top:1rem;border-top:1px solid var(--border)">
+              <div class="form-grid">
+                <div class="form-group">
+                  <label>Langue par défaut</label>
+                  <select><option value="fr">Français</option></select>
+                </div>
+                <div class="form-group">
+                  <label>Timezone</label>
+                  <select>
+                    <option value="Africa/Casablanca">Africa/Casablanca</option>
+                    <option value="Europe/Paris">Europe/Paris</option>
+                  </select>
+                </div>
+              </div>
+              <button type="button" class="btn-save" onclick="saveSys()">💾 Enregistrer</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- MODAL: AJOUTER CONGE -->
+  <div class="modal-overlay" id="modalConge">
+    <div class="modal">
+      <div class="modal-title">➕ Ajouter Type de Congé</div>
+      <form method="POST" action="/dashboard/parametres/conge/add/">
+        {% csrf_token %}
+        <div class="form-group" style="margin-bottom:1rem">
+          <label>Type de congé *</label>
+          <select name="name" required>
+            <option value="">— Choisir le type —</option>
+            <option>Congé Annuel</option>
+            <option>Congé Maternité</option>
+            <option>Congé Maladie</option>
+            <option>Mission</option>
+            <option>Accident de Travail (AT)</option>
+            <option>Jour Férié</option>
+            <option>Allaitement</option>
+            <option>Autre</option>
+          </select>
+        </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Jours maximum *</label>
+            <input type="number" name="max_days" placeholder="18" required />
+          </div>
+          <div class="form-group">
+            <label>Payé ?</label>
+            <select name="is_paid">
+              <option value="1">Oui</option>
+              <option value="0">Non</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Document requis ?</label>
+            <select name="requires_document">
+              <option value="0">Non</option>
+              <option value="1">Oui</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button type="submit" class="btn-save">💾 Ajouter</button>
+          <button type="button" class="btn-cancel" onclick="hideModal('modalConge')">Annuler</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: MODIFIER CONGE -->
+  <div class="modal-overlay" id="modalEditConge">
+    <div class="modal">
+      <div class="modal-title">✏️ Modifier Type de Congé</div>
+      <form method="POST" id="editCongeForm" action="">
+        {% csrf_token %}
+        <input type="hidden" name="id" id="edit_id">
+        <div class="form-group" style="margin-bottom:1rem">
+          <label>Type de congé *</label>
+          <select name="name" id="edit_name" required>
+            <option>Congé Annuel</option>
+            <option>Congé Maternité</option>
+            <option>Congé Maladie</option>
+            <option>Mission</option>
+            <option>Accident de Travail (AT)</option>
+            <option>Jour Férié</option>
+            <option>Allaitement</option>
+            <option>Autre</option>
+          </select>
+        </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Jours maximum *</label>
+            <input type="number" name="max_days" id="edit_max_days" required />
+          </div>
+          <div class="form-group">
+            <label>Payé ?</label>
+            <select name="is_paid" id="edit_is_paid">
+              <option value="1">Oui</option>
+              <option value="0">Non</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Document requis ?</label>
+            <select name="requires_document" id="edit_requires_document">
+              <option value="0">Non</option>
+              <option value="1">Oui</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Statut</label>
+            <select name="is_active" id="edit_is_active">
+              <option value="1">Actif</option>
+              <option value="0">Inactif</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button type="submit" class="btn-save">💾 Enregistrer</button>
+          <button type="button" class="btn-cancel" onclick="hideModal('modalEditConge')">Annuler</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: REFUS JUSTIFICATION -->
+  <div class="modal-refus-overlay" id="modalRefus">
+    <div class="modal-refus">
+      <div class="modal-refus-title">❌ Motif du refus</div>
+      <textarea class="modal-refus-textarea" id="refus-motif-input"
+        placeholder="Expliquez pourquoi la justification est refusée..."></textarea>
+      <div class="modal-refus-actions">
+        <button class="btn-cancel" onclick="closeRefusModal()">Annuler</button>
+        <button class="btn-refuse-justif" onclick="confirmerRefus()">Confirmer le refus</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      const dark = localStorage.getItem('sigp_dark_mode') !== 'false';
+      document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+    })();
+
+    function showTab(tab, el) {
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.getElementById('tab-' + tab).classList.add('active');
+      el.classList.add('active');
+    }
+
+    function showModal(id) { document.getElementById(id).classList.add('show'); }
+    function hideModal(id) { document.getElementById(id).classList.remove('show'); }
+    document.querySelectorAll('.modal-overlay').forEach(m => {
+      m.addEventListener('click', e => { if (e.target === m) m.classList.remove('show'); });
+    });
+
+    function openEditModal(id, name, max_days, is_paid, requires_document, is_active) {
+      document.getElementById('modalEditConge').classList.add('show');
+      document.getElementById('editCongeForm').action = `/dashboard/parametres/conge/${id}/edit/`;
+      document.getElementById('edit_id').value = id;
+      document.getElementById('edit_name').value = name;
+      document.getElementById('edit_max_days').value = max_days;
+      document.getElementById('edit_is_paid').value = is_paid === 'True' ? '1' : '0';
+      document.getElementById('edit_requires_document').value = requires_document === 'True' ? '1' : '0';
+      document.getElementById('edit_is_active').value = is_active === 'True' ? '1' : '0';
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const isDark = localStorage.getItem('sigp_dark_mode') !== 'false';
+      document.getElementById('darkToggle').classList.toggle('on', isDark);
+    });
+
+    function toggleDark(btn) {
+      btn.classList.toggle('on');
+      const isDark = btn.classList.contains('on');
+      localStorage.setItem('sigp_dark_mode', isDark);
+      document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+    }
+
+    function saveSys() {
+      const isDark = document.getElementById('darkToggle').classList.contains('on');
+      localStorage.setItem('sigp_dark_mode', isDark);
+      document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+      const t = document.createElement('div');
+      t.textContent = '✅ Paramètres enregistrés !';
+      t.style.cssText = 'position:fixed;bottom:2rem;right:2rem;background:#1a6bff;color:white;padding:10px 20px;border-radius:10px;font-size:13px;z-index:9999';
+      document.body.appendChild(t);
+      setTimeout(() => t.remove(), 3000);
+    }
+
+    // Avertissements
+    function toggleDetail(id) {
+      const el = document.getElementById(id);
+      const avertId = id.replace('detail-', '');
+      const chevron = document.getElementById('chevron-' + avertId);
+      const isOpen = el.classList.contains('open');
+      el.classList.toggle('open');
+      chevron.style.transform = isOpen ? '' : 'rotate(180deg)';
+    }
+
+    let currentRefusAvertId = null;
+
+    function openRefusModal(avertId) {
+      currentRefusAvertId = avertId;
+      document.getElementById('refus-motif-input').value = '';
+      document.getElementById('modalRefus').classList.add('show');
+    }
+    function closeRefusModal() {
+      document.getElementById('modalRefus').classList.remove('show');
+      currentRefusAvertId = null;
+    }
+    document.getElementById('modalRefus').addEventListener('click', e => {
+      if (e.target === document.getElementById('modalRefus')) closeRefusModal();
+    });
+
+    function confirmerRefus() {
+      const motif = document.getElementById('refus-motif-input').value.trim();
+      if (!motif) { alert('Veuillez indiquer un motif de refus.'); return; }
+      traiterJustif(currentRefusAvertId, 'refuser', motif);
+      closeRefusModal();
+    }
+
+    function traiterJustif(avertId, action, motif = '') {
+      fetch('/avertissement/traiter/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+        body: JSON.stringify({ avert_id: avertId, action, motif })
+      })
+      .then(r => r.json())
+      .then(data => { if (data.status === 'ok') location.reload(); });
+    }
+
+    function getCookie(name) {
+      const v = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
+      return v ? v.pop() : '';
+    }
+  </script>
+</body>
+</html>

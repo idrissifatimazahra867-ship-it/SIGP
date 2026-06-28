@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SIGP — Mes Congés</title>
+  <script>
+    (function() {
+      const dark = localStorage.getItem('sigp_dark_mode') !== 'false';
+      document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+    })();
+  </script>
+  <style>
+    :root, [data-theme="dark"] {
+      --bg-main: #0a0f1e;
+      --bg-sidebar: #0d1220;
+      --bg-card: #111827;
+      --bg-input: #0d1526;
+      --border: #1e2a45;
+      --border-sub: #0f1828;
+      --text: #fff;
+      --text-muted: #8a9bbf;
+      --text-dim: #5a6a8a;
+      --text-dimmer: #3a4a6a;
+      --nav-hover: #151c30;
+      --accent: #1a6bff;
+    }
+    [data-theme="light"] {
+      --bg-main: #f0f4ff;
+      --bg-sidebar: #ffffff;
+      --bg-card: #ffffff;
+      --bg-input: #f5f7ff;
+      --border: #dde3f0;
+      --border-sub: #e8ecf5;
+      --text: #0d1220;
+      --text-muted: #4a5568;
+      --text-dim: #6b7280;
+      --text-dimmer: #9ca3af;
+      --nav-hover: #f0f4ff;
+      --accent: #1a6bff;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', sans-serif; background: var(--bg-main); color: var(--text); min-height: 100vh; display: flex; }
+
+    .sidebar { width: 240px; background: var(--bg-sidebar); border-right: 1px solid var(--border); display: flex; flex-direction: column; position: fixed; height: 100vh; z-index: 100; }
+    .sidebar-logo { padding: 1.5rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
+    .logo-icon { width: 40px; height: 40px; background: linear-gradient(135deg, #1a6bff, #0d4fd6); border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .logo-text { font-size: 16px; font-weight: 700; color: var(--text); }
+    .logo-sub { font-size: 10px; color: var(--text-dim); }
+    .sidebar-nav { flex: 1; padding: 1rem 0; overflow-y: auto; }
+    .nav-section-title { font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-dimmer); padding: 0.8rem 1.5rem 0.4rem; }
+    .nav-item { display: flex; align-items: center; gap: 10px; padding: 0.7rem 1.5rem; color: var(--text-muted); text-decoration: none; font-size: 13.5px; transition: all 0.2s; border-left: 3px solid transparent; }
+    .nav-item:hover { background: var(--nav-hover); color: var(--text); border-left-color: var(--accent); }
+    .nav-item.active { background: rgba(26,107,255,0.1); color: var(--accent); border-left-color: var(--accent); font-weight: 500; }
+    .nav-icon { font-size: 16px; width: 20px; text-align: center; }
+    .sidebar-footer { padding: 1rem 1.5rem; border-top: 1px solid var(--border); }
+.user-info { display: flex; align-items: center; gap: 10px; }
+.user-details { flex: 1; min-width: 0; }
+.user-name { font-size: 13px; font-weight: 500; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .user-role { font-size: 11px; color: var(--text-dim); }
+.user-avatar { width: 34px; height: 34px; background: linear-gradient(135deg, #1a6bff, #0d4fd6); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600; color: white; flex-shrink: 0; }
+.btn-logout {
+  width: 32px; height: 32px; flex-shrink: 0;
+  background: rgba(220,53,69,0.08);
+  border: 1px solid rgba(220,53,69,0.15);
+  border-radius: 8px; color: #f87171;
+  display: flex; align-items: center; justify-content: center;
+  text-decoration: none; transition: all 0.2s;
+}
+.btn-logout:hover { background: rgba(220,53,69,0.2); border-color: rgba(220,53,69,0.3); color: #ff6b7a; transform: scale(1.05); }
+
+    .main { margin-left: 240px; flex: 1; display: flex; flex-direction: column; }
+    .topbar { background: var(--bg-sidebar); border-bottom: 1px solid var(--border); padding: 0 2rem; height: 60px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; }
+    .topbar-title { font-size: 16px; font-weight: 600; color: var(--text); }
+    .topbar-sub { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
+    .btn-new { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; background: var(--accent); border: none; border-radius: 8px; color: white; font-size: 13px; font-weight: 500; cursor: pointer; text-decoration: none; transition: all 0.2s; }
+    .btn-new:hover { background: #0d4fd6; }
+
+    .content { padding: 2rem; flex: 1; }
+
+    .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1.5rem; }
+    .stat-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 1.1rem; display: flex; align-items: center; gap: 12px; }
+    .stat-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+    .stat-num { font-size: 22px; font-weight: 700; color: var(--text); }
+    .stat-label { font-size: 12px; color: var(--text-dim); }
+
+    .toolbar { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 1rem 1.2rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+    .filter-select { padding: 8px 12px; background: var(--bg-input); border: 1px solid var(--border); border-radius: 8px; color: var(--text-muted); font-size: 13px; outline: none; cursor: pointer; }
+    .filter-select option { background: var(--bg-input); }
+    .search-input { flex: 1; min-width: 180px; padding: 8px 14px; background: var(--bg-input); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 13px; outline: none; }
+    .search-input::placeholder { color: var(--text-dimmer); }
+    .search-input:focus { border-color: var(--accent); }
+
+    .table-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+    table { width: 100%; border-collapse: collapse; }
+    th { padding: 0.9rem 1rem; text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-dimmer); border-bottom: 1px solid var(--border); background: var(--bg-sidebar); }
+    td { padding: 0.85rem 1rem; font-size: 13px; color: var(--text-muted); border-bottom: 1px solid var(--border-sub); }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: var(--bg-input); }
+
+    .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 500; }
+    .badge-pending  { background: rgba(234,179,8,0.15); color: #facc15; }
+    .badge-approved { background: rgba(34,197,94,0.15);  color: #4ade80; }
+    .badge-rejected { background: rgba(239,68,68,0.15);  color: #f87171; }
+    .badge-cancelled{ background: rgba(100,116,139,0.15);color: #94a3b8; }
+    .badge-type     { background: rgba(26,107,255,0.15); color: #60a5fa; }
+
+    .btn-cancel-conge { padding: 5px 10px; background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.2); border-radius: 6px; color: #f87171; font-size: 12px; cursor: pointer; text-decoration: none; transition: all 0.2s; }
+    .btn-cancel-conge:hover { background: rgba(239,68,68,0.3); }
+  </style>
+</head>
+<body>
+
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon">
+        <svg width="22" height="22" viewBox="0 0 36 36" fill="none">
+          <rect x="4" y="8" width="28" height="3.5" rx="1.75" fill="white"/>
+          <rect x="4" y="16" width="20" height="3.5" rx="1.75" fill="white" opacity="0.7"/>
+          <rect x="4" y="24" width="24" height="3.5" rx="1.75" fill="white" opacity="0.5"/>
+        </svg>
+      </div>
+      <div><div class="logo-text">SIGP RH</div><div class="logo-sub">Espace Employé</div></div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-title">Mon Espace</div>
+      <a class="nav-item" href="/dashboard/employee/"><span class="nav-icon">🏠</span> Accueil</a>
+      <a class="nav-item" href="/pointage/employee/"><span class="nav-icon">⏱️</span> Mon Pointage</a>
+      <div class="nav-section-title">Congés</div>
+      <a class="nav-item active" href="/leaves/mes_conges"><span class="nav-icon">📅</span> Mes Congés</a>
+      <a class="nav-item" href="/leaves/new/"><span class="nav-icon">➕</span> Demander Congé</a>
+      <div class="nav-section-title">Historique</div>
+      <a class="nav-item" href="/pointage/history/"><span class="nav-icon">📋</span> Historique Pointage</a>
+    </nav>
+    <div class="sidebar-footer">
+  <div class="user-info">
+    <div class="user-avatar">{{ request.user.prenom|first|upper|default:request.user.email|first|upper }}</div>
+    <div class="user-details">
+      <div class="user-name">{{ request.user.prenom }} {{ request.user.nom }}</div>
+      <div class="user-role">Employé</div>
+    </div>
+    <a href="/logout/" class="btn-logout" title="Se déconnecter">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+        <polyline points="16 17 21 12 16 7"/>
+        <line x1="21" y1="12" x2="9" y2="12"/>
+      </svg>
+    </a>
+  </div>
+</div>
+  </div>
+
+  <div class="main">
+    <div class="topbar">
+      <div>
+        <div class="topbar-title">📅 Mes Congés</div>
+        <div class="topbar-sub">Historique de vos demandes</div>
+      </div>
+      <a href="/leaves/new/" class="btn-new">➕ Nouvelle demande</a>
+    </div>
+
+    <div class="content">
+
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-icon" style="background:rgba(234,179,8,0.15)">⏳</div>
+          <div><div class="stat-num">{{ attente_count }}</div><div class="stat-label">En Attente</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:rgba(34,197,94,0.15)">✅</div>
+          <div><div class="stat-num">{{ valide_count }}</div><div class="stat-label">Approuvés</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:rgba(239,68,68,0.15)">❌</div>
+          <div><div class="stat-num">{{ refuse_count }}</div><div class="stat-label">Refusés</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:rgba(26,107,255,0.15)">📋</div>
+          <div><div class="stat-num">{{ total_count }}</div><div class="stat-label">Total</div></div>
+        </div>
+      </div>
+
+      <form method="GET" class="toolbar">
+        <input class="search-input" type="text" placeholder="🔍 Rechercher..." oninput="filterTable(this.value)" />
+        <select class="filter-select" name="statut" onchange="this.form.submit()">
+          <option value="" {% if not request.GET.statut %}selected{% endif %}>Tous les statuts</option>
+          <option value="en_attente" {% if request.GET.statut == "en_attente" %}selected{% endif %}>En attente</option>
+          <option value="valide" {% if request.GET.statut == "valide" %}selected{% endif %}>Validé</option>
+          <option value="refuse" {% if request.GET.statut == "refuse" %}selected{% endif %}>Refusé</option>
+          <option value="annule" {% if request.GET.statut == "annule" %}selected{% endif %}>Annulé</option>
+        </select>
+      </form>
+
+      <div class="table-card">
+        <table>
+          <thead>
+            <tr>
+              <th>Type</th>
+              <th>Du</th>
+              <th>Au</th>
+              <th>Jours</th>
+              <th>Motif</th>
+              <th>Statut</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for conge in conges %}
+            <tr>
+              <td><span class="badge badge-type">{{ conge.typeConge.name }}</span></td>
+              <td>{{ conge.date_debut|date:"d/m/Y" }}</td>
+              <td>{{ conge.date_fin|date:"d/m/Y" }}</td>
+              <td>{{ conge.date_fin|timeuntil:conge.date_debut }}</td>
+              <td>{{ conge.motif|truncatechars:30 }}</td>
+              <td>
+                {% if conge.statut == 'en_attente' %}
+                  <span class="badge badge-pending">En attente</span>
+                {% elif conge.statut == 'valide' %}
+                  <span class="badge badge-approved">Validé</span>
+                {% elif conge.statut == 'refuse' %}
+                  <span class="badge badge-rejected">Refusé</span>
+                {% else %}
+                  <span class="badge badge-cancelled">Annulé</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if conge.statut == 'en_attente' %}
+                  <a href="{% url 'conge-annuler' conge.idConge %}" class="btn-cancel-conge"
+                     onclick="return confirm('Annuler cette demande ?')">🚫 Annuler</a>
+                {% else %}
+                  —
+                {% endif %}
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="7" style="text-align:center;padding:3rem;color:var(--text-dimmer)">
+                Aucune demande de congé — <a href="/leaves/new/" style="color:var(--accent)">Faire une demande</a>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    function filterTable(value) {
+      const rows = document.querySelectorAll("tbody tr");
+      rows.forEach(row => {
+        const text = row.innerText.toLowerCase();
+        row.style.display = text.includes(value.toLowerCase()) ? "" : "none";
+      });
+    }
+  </script>
+</body>
+</html>

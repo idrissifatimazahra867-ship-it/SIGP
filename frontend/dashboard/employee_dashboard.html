@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="{{ sys_theme }}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SIGP — Mon Espace</title>
+  <style>
+    :root, [data-theme="dark"] {
+      --bg: #0a0f1e; --sidebar-bg: #0d1220; --card-bg: #111827;
+      --border: #1e2a45; --text: #ffffff; --text-muted: #5a6a8a;
+      --text-nav: #8a9bbf; --hover-bg: #151c30; --row-hover: #0d1526;
+      --topbar-bg: #0d1220; --nav-section: #3a4a6a; --td-border: #0f1828;
+      --welcome-bg: linear-gradient(135deg, #0d2050, #1a3a8a);
+      --text-dimmer: #3a4a6a; --nav-hover: #151c30; --accent: #1a6bff;
+      --text-dim: #5a6a8a; --input-bg: #0d1526;
+    }
+    [data-theme="light"] {
+      --bg: #f0f4ff; --sidebar-bg: #ffffff; --card-bg: #ffffff;
+      --border: #dde3f0; --text: #0a0f1e; --text-muted: #6b7a99;
+      --text-nav: #4a5a7a; --hover-bg: #f0f4ff; --row-hover: #f5f7ff;
+      --topbar-bg: #ffffff; --nav-section: #9aaac4; --td-border: #eef1f8;
+      --welcome-bg: linear-gradient(135deg, #dce8ff, #c7d8ff);
+      --text-dimmer: #9ca3af; --nav-hover: #f0f4ff; --accent: #1a6bff;
+      --text-dim: #6b7280; --input-bg: #f5f7ff;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; transition: background 0.3s, color 0.3s; }
+
+    /* SIDEBAR */
+    .sidebar { width: 240px; background: var(--sidebar-bg); border-right: 1px solid var(--border); display: flex; flex-direction: column; position: fixed; height: 100vh; z-index: 100; }
+    .sidebar-logo { padding: 1.5rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
+    .logo-icon { width: 40px; height: 40px; background: linear-gradient(135deg, #1a6bff, #0d4fd6); border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .logo-text { font-size: 16px; font-weight: 700; color: var(--text); }
+    .logo-sub { font-size: 10px; color: var(--text-muted); }
+    .sidebar-nav { flex: 1; padding: 1rem 0; overflow-y: auto; }
+    .nav-section-title { font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--nav-section); padding: 0.8rem 1.5rem 0.4rem; }
+    .nav-item { display: flex; align-items: center; gap: 10px; padding: 0.7rem 1.5rem; color: var(--text-nav); text-decoration: none; font-size: 13.5px; transition: all 0.2s; border-left: 3px solid transparent; }
+    .nav-item:hover { background: var(--hover-bg); color: var(--text); border-left-color: #1a6bff; }
+    .nav-item.active { background: rgba(26,107,255,0.1); color: #1a6bff; border-left-color: #1a6bff; font-weight: 500; }
+    .nav-icon { font-size: 16px; width: 20px; text-align: center; }
+    .sidebar-footer { padding: 1rem 1.5rem; border-top: 1px solid var(--border); }
+    .user-info { display: flex; align-items: center; gap: 10px; }
+    .user-details { flex: 1; min-width: 0; }
+    .user-name { font-size: 13px; font-weight: 500; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .user-role { font-size: 11px; color: var(--text-dim); }
+    .user-avatar { width: 34px; height: 34px; background: linear-gradient(135deg, #1a6bff, #0d4fd6); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600; color: white; flex-shrink: 0; }
+    .btn-logout { width: 32px; height: 32px; flex-shrink: 0; background: rgba(220,53,69,0.08); border: 1px solid rgba(220,53,69,0.15); border-radius: 8px; color: #f87171; display: flex; align-items: center; justify-content: center; text-decoration: none; transition: all 0.2s; }
+    .btn-logout:hover { background: rgba(220,53,69,0.2); border-color: rgba(220,53,69,0.3); color: #ff6b7a; transform: scale(1.05); }
+
+    /* MAIN */
+    .main { margin-left: 240px; flex: 1; display: flex; flex-direction: column; }
+    .topbar { background: var(--topbar-bg); border-bottom: 1px solid var(--border); padding: 0 2rem; height: 60px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; }
+    .topbar-title { font-size: 16px; font-weight: 600; color: var(--text); }
+    .topbar-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+    .topbar-right { display: flex; align-items: center; gap: 12px; }
+    .live-clock { font-size: 22px; font-weight: 700; color: #1a6bff; font-family: 'Courier New', monospace; letter-spacing: 2px; }
+    .live-date { font-size: 11px; color: var(--text-muted); text-align: right; }
+    .content { padding: 2rem; flex: 1; }
+
+    /* WELCOME */
+    .welcome-card { background: var(--welcome-bg); border: 1px solid var(--border); border-radius: 16px; padding: 1.8rem 2rem; margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between; }
+    .welcome-left h2 { font-size: 20px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+    .welcome-left p { font-size: 13px; color: var(--text-muted); }
+    .welcome-badge { background: rgba(26,107,255,0.2); border: 1px solid rgba(26,107,255,0.3); border-radius: 10px; padding: 0.8rem 1.2rem; text-align: center; }
+    .welcome-badge-num { font-size: 24px; font-weight: 700; color: #1a6bff; }
+    .welcome-badge-label { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+    /* STATS */
+    .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1.5rem; }
+    .stat-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 14px; padding: 1.3rem; transition: transform 0.2s; }
+    .stat-card:hover { transform: translateY(-2px); }
+    .stat-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; margin-bottom: 0.8rem; }
+    .stat-num { font-size: 26px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+    .stat-label { font-size: 12px; color: var(--text-muted); }
+
+    /* ===== AVERTISSEMENTS REDESIGN ===== */
+    .avert-section { margin-bottom: 1.5rem; }
+
+    .avert-header-bar {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+    .avert-header-left { display: flex; align-items: center; gap: 10px; }
+    .avert-header-icon {
+      width: 36px; height: 36px;
+      background: rgba(239,68,68,0.12);
+      border: 1px solid rgba(239,68,68,0.25);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+    }
+    .avert-header-title { font-size: 15px; font-weight: 700; color: var(--text); }
+    .avert-header-sub { font-size: 11px; color: var(--text-dim); margin-top: 1px; }
+    .avert-count-badge {
+      background: #dc2626; color: white;
+      font-size: 11px; font-weight: 700;
+      padding: 3px 10px; border-radius: 20px;
+      animation: pulse-badge 2s infinite;
+    }
+    @keyframes pulse-badge {
+      0%,100% { box-shadow: 0 0 0 0 rgba(220,38,38,0.4); }
+      50% { box-shadow: 0 0 0 6px rgba(220,38,38,0); }
+    }
+
+    .avert-list { display: flex; flex-direction: column; gap: 0; }
+
+    /* Carte avertissement */
+    .avert-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 0;
+      overflow: hidden;
+      transition: all 0.2s;
+    }
+    .avert-card:first-child { border-radius: 14px 14px 0 0; }
+    .avert-card:last-child { border-radius: 0 0 14px 14px; }
+    .avert-card:only-child { border-radius: 14px; }
+    .avert-card + .avert-card { border-top: none; }
+
+    .avert-card.unread {
+      border-left: 3px solid #ef4444;
+    }
+    .avert-card.read {
+      border-left: 3px solid transparent;
+      opacity: 0.75;
+    }
+
+    /* Header de la carte */
+    .avert-card-top {
+      display: flex; align-items: center;
+      padding: 1rem 1.2rem;
+      gap: 12px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .avert-card-top:hover { background: var(--hover-bg); }
+
+    .avert-severity {
+      width: 38px; height: 38px; border-radius: 10px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center; font-size: 17px;
+    }
+    .sev-high { background: rgba(239,68,68,0.15); }
+    .sev-medium { background: rgba(234,179,8,0.15); }
+
+    .avert-card-info { flex: 1; min-width: 0; }
+    .avert-card-motif { font-size: 13px; font-weight: 600; color: var(--text); }
+    .avert-card-meta { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
+
+    .avert-card-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+    .tag-new {
+      font-size: 10px; font-weight: 700;
+      background: #dc2626; color: white;
+      padding: 2px 8px; border-radius: 20px;
+    }
+    .tag-read {
+      font-size: 10px; font-weight: 600;
+      background: rgba(100,116,139,0.15); color: var(--text-dim);
+      padding: 2px 8px; border-radius: 20px;
+    }
+    .avert-chevron {
+      color: var(--text-dim); font-size: 12px;
+      transition: transform 0.2s;
+    }
+    .avert-card.open .avert-chevron { transform: rotate(180deg); }
+
+    /* Body expandable */
+    .avert-card-body {
+      display: none;
+      border-top: 1px solid var(--border);
+      padding: 1.2rem;
+      background: rgba(239,68,68,0.03);
+    }
+    .avert-card.open .avert-card-body { display: block; }
+
+    .avert-message-text {
+      font-size: 13px; color: var(--text-muted);
+      line-height: 1.7; margin-bottom: 1.2rem;
+      padding: 0.9rem 1rem;
+      background: var(--input-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+
+    /* Zone justification */
+    .justif-zone {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .justif-header {
+      display: flex; align-items: center; gap: 8px;
+      padding: 0.7rem 1rem;
+      background: var(--input-bg);
+      border-bottom: 1px solid var(--border);
+      font-size: 12px; font-weight: 600; color: var(--text);
+    }
+    .justif-body { padding: 1rem; display: flex; flex-direction: column; gap: 0.8rem; }
+
+    .justif-textarea {
+      width: 100%; padding: 0.7rem 0.9rem;
+      background: var(--input-bg); border: 1px solid var(--border);
+      border-radius: 8px; color: var(--text);
+      font-size: 13px; font-family: inherit;
+      resize: vertical; min-height: 80px; outline: none;
+      transition: border-color 0.2s;
+    }
+    .justif-textarea:focus { border-color: var(--accent); }
+    .justif-textarea::placeholder { color: var(--text-dimmer, #3a4a6a); }
+
+    /* Drop zone fichier */
+    .drop-zone {
+      border: 2px dashed var(--border);
+      border-radius: 8px;
+      padding: 1.2rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+    }
+    .drop-zone:hover, .drop-zone.drag-over {
+      border-color: var(--accent);
+      background: rgba(26,107,255,0.05);
+    }
+    .drop-zone input[type="file"] {
+      position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+    }
+    .drop-icon { font-size: 22px; margin-bottom: 6px; }
+    .drop-label { font-size: 12px; color: var(--text-dim); }
+    .drop-label span { color: var(--accent); font-weight: 600; }
+    .drop-hint { font-size: 10px; color: var(--text-dimmer, #3a4a6a); margin-top: 3px; }
+
+    .file-preview {
+      display: none;
+      align-items: center; gap: 8px;
+      padding: 0.6rem 0.8rem;
+      background: rgba(26,107,255,0.08);
+      border: 1px solid rgba(26,107,255,0.2);
+      border-radius: 8px;
+    }
+    .file-preview.show { display: flex; }
+    .file-preview-name { font-size: 12px; color: var(--accent); flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .file-remove { background: none; border: none; color: var(--text-dim); cursor: pointer; font-size: 14px; padding: 0; transition: color 0.2s; }
+    .file-remove:hover { color: #f87171; }
+
+    .justif-actions { display: flex; gap: 8px; justify-content: flex-end; }
+    .btn-justif-cancel {
+      padding: 7px 14px; border-radius: 7px;
+      background: var(--input-bg); border: 1px solid var(--border);
+      color: var(--text-muted); font-size: 12px; cursor: pointer; transition: all 0.2s;
+    }
+    .btn-justif-cancel:hover { border-color: var(--accent); color: var(--text); }
+    .btn-justif-send {
+      padding: 7px 16px; border-radius: 7px;
+      background: var(--accent); border: 1px solid var(--accent);
+      color: white; font-size: 12px; font-weight: 600; cursor: pointer;
+      display: flex; align-items: center; gap: 6px; transition: all 0.2s;
+    }
+    .btn-justif-send:hover { background: #0d4fd6; }
+
+    /* Tag justification déjà envoyée */
+    .justif-sent-tag {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 6px 12px; border-radius: 8px;
+      background: rgba(34,197,94,0.1);
+      border: 1px solid rgba(34,197,94,0.2);
+      color: #4ade80; font-size: 12px; font-weight: 500;
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed; bottom: 24px; right: 24px; z-index: 9999;
+      padding: 12px 18px; border-radius: 10px; font-size: 13px;
+      display: none; align-items: center; gap: 8px;
+      animation: toastIn 0.3s ease;
+    }
+    .toast.show { display: flex; }
+    .toast-success { background: #14532d; border: 1px solid #16a34a; color: #4ade80; }
+    @keyframes toastIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+    /* ============================= */
+
+    /* POINTAGE */
+    .pointage-section { background: var(--card-bg); border: 1px solid var(--border); border-radius: 16px; padding: 1.5rem; margin-bottom: 1.5rem; }
+    .section-title { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 0.4rem; }
+    .section-sub { font-size: 12px; color: var(--text-muted); margin-bottom: 1.5rem; }
+    .pointage-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
+    .pointage-btn { border-radius: 14px; padding: 1.2rem 0.8rem; display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; border: 1.5px solid; transition: all 0.2s; background: transparent; width: 100%; }
+    .pointage-btn:hover:not(:disabled) { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0,0,0,0.2); }
+    .pointage-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+    .btn-arrivee { border-color: rgba(34,197,94,0.4); color: #4ade80; }
+    .btn-arrivee:hover:not(:disabled) { background: rgba(34,197,94,0.1); border-color: #4ade80; }
+    .btn-depart-pause { border-color: rgba(234,179,8,0.4); color: #facc15; }
+    .btn-depart-pause:hover:not(:disabled) { background: rgba(234,179,8,0.1); border-color: #facc15; }
+    .btn-retour { border-color: rgba(139,92,246,0.4); color: #a78bfa; }
+    .btn-retour:hover:not(:disabled) { background: rgba(139,92,246,0.1); border-color: #a78bfa; }
+    .btn-depart-final { border-color: rgba(239,68,68,0.4); color: #f87171; }
+    .btn-depart-final:hover:not(:disabled) { background: rgba(239,68,68,0.1); border-color: #f87171; }
+    .pointage-btn-icon { font-size: 26px; }
+    .pointage-btn-label { font-size: 12px; font-weight: 600; color: inherit; }
+    .pointage-btn-time { font-size: 11px; color: var(--text-muted); min-height: 16px; }
+    .pointage-btn-time.recorded { color: #4ade80; }
+
+    /* BOTTOM */
+    .bottom-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .section-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+    .section-header { padding: 1rem 1.3rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .section-header-title { font-size: 14px; font-weight: 600; color: var(--text); }
+    .section-header-sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+    .btn-small { padding: 5px 12px; background: rgba(26,107,255,0.1); border: 1px solid rgba(26,107,255,0.2); border-radius: 6px; color: #1a6bff; font-size: 12px; cursor: pointer; text-decoration: none; transition: all 0.2s; }
+    .btn-small:hover { background: #1a6bff; color: white; }
+    .btn-conge { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; background: #1a6bff; border: none; border-radius: 8px; color: white; font-size: 12px; font-weight: 500; cursor: pointer; text-decoration: none; transition: all 0.2s; }
+    .btn-conge:hover { background: #0d4fd6; }
+    table { width: 100%; border-collapse: collapse; }
+    th { padding: 0.7rem 1rem; text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: 0.8px; color: var(--nav-section); border-bottom: 1px solid var(--border); }
+    td { padding: 0.75rem 1rem; font-size: 13px; color: var(--text-nav); border-bottom: 1px solid var(--td-border); }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: var(--row-hover); color: var(--text); }
+    .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 500; }
+    .badge-present { background: rgba(34,197,94,0.15); color: #4ade80; }
+    .badge-late { background: rgba(234,179,8,0.15); color: #facc15; }
+    .badge-pending { background: rgba(234,179,8,0.15); color: #facc15; }
+    .badge-approved { background: rgba(34,197,94,0.15); color: #4ade80; }
+    .badge-rejected { background: rgba(239,68,68,0.15); color: #f87171; }
+  </style>
+</head>
+<body>
+
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon">
+        <svg width="22" height="22" viewBox="0 0 36 36" fill="none">
+          <rect x="4" y="8" width="28" height="3.5" rx="1.75" fill="white"/>
+          <rect x="4" y="16" width="20" height="3.5" rx="1.75" fill="white" opacity="0.7"/>
+          <rect x="4" y="24" width="24" height="3.5" rx="1.75" fill="white" opacity="0.5"/>
+        </svg>
+      </div>
+      <div><div class="logo-text">SIGP RH</div><div class="logo-sub">Espace Employé</div></div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-title">Mon Espace</div>
+      <a class="nav-item active" href="/dashboard/employee/"><span class="nav-icon">🏠</span> Accueil</a>
+      <a class="nav-item" href="/pointage/employee/"><span class="nav-icon">⏱️</span> Mon Pointage</a>
+      <div class="nav-section-title">Congés</div>
+      <a class="nav-item" href="{% url 'employee-leaves' %}"><span class="nav-icon">📅</span> Mes Congés</a>
+      <a class="nav-item" href="{% url 'leaves-new' %}"><span class="nav-icon">➕</span> Demander Congé</a>
+      <div class="nav-section-title">Historique</div>
+      <a class="nav-item" href="/pointage/history/"><span class="nav-icon">📋</span> Historique Pointage</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <div class="user-avatar">{{ request.user.prenom|first|upper|default:request.user.email|first|upper }}</div>
+        <div class="user-details">
+          <div class="user-name">{{ request.user.prenom }} {{ request.user.nom }}</div>
+          <div class="user-role">Employé</div>
+        </div>
+        <a href="/logout/" class="btn-logout" title="Se déconnecter">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+            <polyline points="16 17 21 12 16 7"/>
+            <line x1="21" y1="12" x2="9" y2="12"/>
+          </svg>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="topbar">
+      <div>
+        <div class="topbar-title">Mon Espace</div>
+        <div class="topbar-sub">Bienvenue dans votre tableau de bord</div>
+      </div>
+      <div class="topbar-right">
+        <div style="text-align:right">
+          <div class="live-clock" id="clock">00:00:00</div>
+          <div class="live-date" id="dateDisplay"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- WELCOME -->
+      <div class="welcome-card">
+        <div class="welcome-left">
+          <h2>Bonjour, {{ request.user.prenom }} {{ request.user.nom }} 👋</h2>
+          <p>Voici votre tableau de bord du jour</p>
+        </div>
+        <div style="display:flex;gap:1rem">
+          <div class="welcome-badge">
+            <div class="welcome-badge-num">{{ employee_retards|default:0 }}</div>
+            <div class="welcome-badge-label">Retards ce mois</div>
+          </div>
+          <div class="welcome-badge">
+            <div class="welcome-badge-num">{{ employee_conges|default:0 }}</div>
+            <div class="welcome-badge-label">Congés pris cette année</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STATS -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon" style="background:rgba(34,197,94,0.15)">✅</div>
+          <div class="stat-num">{{ employee_presences|default:0 }}</div>
+          <div class="stat-label">Jours présents ce mois</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:rgba(26,107,255,0.15)">📅</div>
+          <div class="stat-num">{{ employee_conges|default:0 }}</div>
+          <div class="stat-label">Congés pris cette année</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:rgba(234,179,8,0.15)">⚠️</div>
+          <div class="stat-num">{{ employee_retards|default:0 }}</div>
+          <div class="stat-label">Retards ce mois</div>
+        </div>
+      </div>
+
+      <!-- ===== AVERTISSEMENTS ===== -->
+      {% if avertissements %}
+      <div class="avert-section">
+        <div class="avert-header-bar">
+          <div class="avert-header-left">
+            <div class="avert-header-icon">⚠️</div>
+            <div>
+              <div class="avert-header-title">Avertissements reçus</div>
+              <div class="avert-header-sub">Cliquez sur un avertissement pour le consulter et répondre</div>
+            </div>
+          </div>
+          {% if nb_non_lus > 0 %}
+            <span class="avert-count-badge">{{ nb_non_lus }} non lu{% if nb_non_lus > 1 %}s{% endif %}</span>
+          {% endif %}
+        </div>
+
+        <div class="avert-list">
+          {% for avert in avertissements %}
+          <div class="avert-card {% if not avert.lu %}unread{% else %}read{% endif %}" id="avert-{{ avert.id }}">
+
+            <div class="avert-card-top" onclick="toggleAvert('{{ avert.id }}')">
+              <div class="avert-severity {% if avert.motif == 'absence_injustifiee' or avert.motif == 'retard_repete' %}sev-high{% else %}sev-medium{% endif %}">
+                {% if avert.motif == 'absence_injustifiee' %}🚫
+                {% elif avert.motif == 'retard_repete' %}🔴
+                {% elif avert.motif == 'retard_ponctuel' %}🟡
+                {% else %}📋{% endif %}
+              </div>
+              <div class="avert-card-info">
+                <div class="avert-card-motif">{{ avert.get_motif_display }}</div>
+                <div class="avert-card-meta">{{ avert.date_envoi|date:"d/m/Y à H:i" }} &nbsp;·&nbsp; Direction RH</div>
+              </div>
+              <div class="avert-card-right">
+                {% if not avert.lu %}<span class="tag-new">Nouveau</span>
+                {% else %}<span class="tag-read">Lu</span>{% endif %}
+                <span class="avert-chevron">▼</span>
+              </div>
+            </div>
+
+            <div class="avert-card-body">
+              <!-- Message de l'admin -->
+              <div class="avert-message-text">{{ avert.message }}</div>
+
+              <!-- Zone de justification -->
+              <div class="justif-zone">
+                <div class="justif-header">
+                  📎 Soumettre une justification
+                </div>
+                <div class="justif-body">
+                  <textarea
+                    class="justif-textarea"
+                    id="justif-text-{{ avert.id }}"
+                    placeholder="Expliquez votre situation (raison de l'absence, circonstances du retard...)"></textarea>
+
+                  <!-- Drop zone fichier -->
+                  <div class="drop-zone" id="drop-{{ avert.id }}"
+                    ondragover="dragOver(event, '{{ avert.id }}')"
+                    ondragleave="dragLeave(event, '{{ avert.id }}')"
+                    ondrop="dropFile(event, '{{ avert.id }}')">
+                    <input type="file" id="file-{{ avert.id }}"
+                      accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+                      onchange="fileSelected('{{ avert.id }}')">
+                    <div class="drop-icon">📄</div>
+                    <div class="drop-label"><span>Choisir un fichier</span> ou glisser-déposer</div>
+                    <div class="drop-hint">PDF, JPG, PNG, DOC — max 5 Mo</div>
+                  </div>
+
+                  <!-- Aperçu fichier sélectionné -->
+                  <div class="file-preview" id="preview-{{ avert.id }}">
+                    <span>📎</span>
+                    <span class="file-preview-name" id="preview-name-{{ avert.id }}"></span>
+                    <button class="file-remove" onclick="removeFile('{{ avert.id }}')">✕</button>
+                  </div>
+
+                  <div class="justif-actions">
+                    <button class="btn-justif-cancel" onclick="resetJustif('{{ avert.id }}')">Annuler</button>
+                    <button class="btn-justif-send" onclick="sendJustif('{{ avert.id }}')">
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                      Envoyer la justification
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+      <!-- ============================= -->
+
+      <!-- POINTAGE -->
+      <div class="pointage-section">
+        <div class="section-title">⏱️ Mon Pointage Aujourd'hui</div>
+        <div class="section-sub">Cliquez sur le bouton correspondant à votre action</div>
+        <div class="pointage-grid">
+          <button class="pointage-btn btn-arrivee" id="btn1" onclick="doPointage('arrivee', 1)"
+            {% if pointage_today.heure_entree %}disabled{% endif %}>
+            <span class="pointage-btn-icon">🟢</span>
+            <span class="pointage-btn-label">Arrivée</span>
+            <span class="pointage-btn-time {% if pointage_today.heure_entree %}recorded{% endif %}" id="time1">
+              {% if pointage_today.heure_entree %}✓ {{ pointage_today.heure_entree|time:"H:i" }}{% else %}Non pointé{% endif %}
+            </span>
+          </button>
+          <button class="pointage-btn btn-depart-pause" id="btn2" onclick="doPointage('depart_pause', 2)"
+            {% if not pointage_today.heure_entree or pointage_today.debut_pause %}disabled{% endif %}>
+            <span class="pointage-btn-icon">⏸️</span>
+            <span class="pointage-btn-label">Départ Pause</span>
+            <span class="pointage-btn-time {% if pointage_today.debut_pause %}recorded{% endif %}" id="time2">
+              {% if pointage_today.debut_pause %}✓ {{ pointage_today.debut_pause|time:"H:i" }}{% else %}En attente{% endif %}
+            </span>
+          </button>
+          <button class="pointage-btn btn-retour" id="btn3" onclick="doPointage('retour_pause', 3)"
+            {% if not pointage_today.debut_pause or pointage_today.retour_pause %}disabled{% endif %}>
+            <span class="pointage-btn-icon">🔄</span>
+            <span class="pointage-btn-label">Retour Pause</span>
+            <span class="pointage-btn-time {% if pointage_today.retour_pause %}recorded{% endif %}" id="time3">
+              {% if pointage_today.retour_pause %}✓ {{ pointage_today.retour_pause|time:"H:i" }}{% else %}En attente{% endif %}
+            </span>
+          </button>
+          <button class="pointage-btn btn-depart-final" id="btn4" onclick="doPointage('depart_final', 4)"
+            {% if not pointage_today.retour_pause or pointage_today.heure_sortie %}disabled{% endif %}>
+            <span class="pointage-btn-icon">🔴</span>
+            <span class="pointage-btn-label">Départ Final</span>
+            <span class="pointage-btn-time {% if pointage_today.heure_sortie %}recorded{% endif %}" id="time4">
+              {% if pointage_today.heure_sortie %}✓ {{ pointage_today.heure_sortie|time:"H:i" }}{% else %}En attente{% endif %}
+            </span>
+          </button>
+        </div>
+      </div>
+
+      <!-- HISTORIQUE + CONGÉS -->
+      <div class="bottom-grid">
+        <div class="section-card">
+          <div class="section-header">
+            <div><div class="section-header-title">📋 Historique Récent</div><div class="section-header-sub">7 derniers jours</div></div>
+            <a href="/pointage/history/" class="btn-small">Voir tout</a>
+          </div>
+          <table>
+            <thead><tr><th>Date</th><th>Arrivée</th><th>Départ</th><th>Statut</th></tr></thead>
+            <tbody>
+              {% for p in recent_pointages %}
+              <tr>
+                <td>{{ p.date }}</td>
+                <td>{{ p.heure_entree|time:"H:i"|default:"—" }}</td>
+                <td>{{ p.heure_sortie|time:"H:i"|default:"—" }}</td>
+                <td>
+                  {% if p.verifier_retard %}<span class="badge badge-late">Retard</span>
+                  {% elif p.heure_entree %}<span class="badge badge-present">Présent</span>
+                  {% else %}<span class="badge badge-rejected">Absent</span>{% endif %}
+                </td>
+              </tr>
+              {% empty %}
+              <tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:1rem">Aucun historique</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        <div class="section-card">
+          <div class="section-header">
+            <div><div class="section-header-title">📅 Mes Demandes de Congé</div><div class="section-header-sub">Statut de mes demandes</div></div>
+            <a href="/leaves/new/" class="btn-conge">➕ Demander</a>
+          </div>
+          <table>
+            <thead><tr><th>Type</th><th>Début</th><th>Statut</th></tr></thead>
+            <tbody>
+              {% for leave in recent_leaves %}
+              <tr>
+                <td>{{ leave.typeConge.name }}</td>
+                <td>{{ leave.date_debut|date:"d/m/Y" }}</td>
+                <td>
+                  {% if leave.statut == 'en_attente' %}<span class="badge badge-pending">En attente</span>
+                  {% elif leave.statut == 'valide' %}<span class="badge badge-approved">Approuvé</span>
+                  {% elif leave.statut == 'refuse' %}<span class="badge badge-rejected">Refusé</span>
+                  {% else %}<span class="badge badge-pending">{{ leave.statut }}</span>{% endif %}
+                </td>
+              </tr>
+              {% empty %}
+              <tr><td colspan="3" style="text-align:center;color:var(--text-muted);padding:1rem">Aucune demande</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="toast toast-success" id="toast">✅ Justification envoyée avec succès</div>
+
+  <script>
+    (function() {
+      const dark = localStorage.getItem('sigp_dark_mode') !== 'false';
+      document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+    })();
+
+    function updateClock() {
+      const now = new Date();
+      const h = String(now.getHours()).padStart(2,'0');
+      const m = String(now.getMinutes()).padStart(2,'0');
+      const s = String(now.getSeconds()).padStart(2,'0');
+      document.getElementById('clock').textContent = h+':'+m+':'+s;
+      const days = ['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];
+      const months = ['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'];
+      document.getElementById('dateDisplay').textContent = days[now.getDay()]+' '+now.getDate()+' '+months[now.getMonth()]+' '+now.getFullYear();
+    }
+    updateClock();
+    setInterval(updateClock, 1000);
+
+    // Toggle expand avertissement
+    function toggleAvert(id) {
+      const card = document.getElementById('avert-' + id);
+      card.classList.toggle('open');
+    }
+
+    // Drag & drop
+    function dragOver(e, id) {
+      e.preventDefault();
+      document.getElementById('drop-' + id).classList.add('drag-over');
+    }
+    function dragLeave(e, id) {
+      document.getElementById('drop-' + id).classList.remove('drag-over');
+    }
+    function dropFile(e, id) {
+      e.preventDefault();
+      document.getElementById('drop-' + id).classList.remove('drag-over');
+      const file = e.dataTransfer.files[0];
+      if (file) showPreview(id, file.name);
+    }
+    function fileSelected(id) {
+      const input = document.getElementById('file-' + id);
+      if (input.files[0]) showPreview(id, input.files[0].name);
+    }
+    function showPreview(id, name) {
+      document.getElementById('preview-name-' + id).textContent = name;
+      document.getElementById('preview-' + id).classList.add('show');
+      document.getElementById('drop-' + id).style.display = 'none';
+    }
+    function removeFile(id) {
+      document.getElementById('file-' + id).value = '';
+      document.getElementById('preview-' + id).classList.remove('show');
+      document.getElementById('drop-' + id).style.display = '';
+    }
+    function resetJustif(id) {
+      document.getElementById('justif-text-' + id).value = '';
+      removeFile(id);
+    }
+
+    // Envoi justification
+  function sendJustif(avertId) {
+  const text = document.getElementById('justif-text-' + avertId).value.trim();
+  const fileInput = document.getElementById('file-' + avertId);
+
+  if (!text && !fileInput.files[0]) {
+    alert('Veuillez rédiger un message ou joindre un document.');
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append('avertissement_id', avertId);
+  formData.append('message', text);
+  if (fileInput.files[0]) formData.append('document', fileInput.files[0]);
+
+  fetch('/avertissement/justifier/', {
+    method: 'POST',
+    headers: { 'X-CSRFToken': getCookie('csrftoken') },
+    body: formData
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.status === 'ok') {
+      // Supprimer la carte du DOM avec animation
+      const card = document.getElementById('avert-' + avertId);
+      card.style.transition = 'opacity 0.4s, transform 0.4s';
+      card.style.opacity = '0';
+      card.style.transform = 'translateX(30px)';
+      setTimeout(() => {
+        card.remove();
+        // Si plus aucun avertissement, cacher toute la section
+        const list = document.querySelector('.avert-list');
+        if (list && list.children.length === 0) {
+          document.querySelector('.avert-section').remove();
+        }
+        showToast();
+      }, 400);
+    }
+  })
+  .catch(() => showToast());
+}
+
+    function showToast() {
+      const t = document.getElementById('toast');
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 3500);
+    }
+
+    function doPointage(type, step) {
+      const now = new Date();
+      const time = String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+      fetch('/pointage/enregistrer/', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json','X-CSRFToken':getCookie('csrftoken')},
+        body: JSON.stringify({type: type})
+      }).then(r => r.json()).then(data => {
+        if (data.status === 'ok') {
+          const timeEl = document.getElementById('time'+step);
+          timeEl.textContent = '✓ ' + time;
+          timeEl.classList.add('recorded');
+          document.getElementById('btn'+step).disabled = true;
+          if (step < 4) document.getElementById('btn'+(step+1)).disabled = false;
+        }
+      }).catch(() => {});
+    }
+
+    function getCookie(name) {
+      let v = '; '+document.cookie, p = v.split('; '+name+'=');
+      if (p.length === 2) return p.pop().split(';').shift();
+    }
+  </script>
+</body>
+</html>

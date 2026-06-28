@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="{{ sys_theme }}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SIGP — Connexion</title>
+  <script>
+    (function() {
+      const dark = localStorage.getItem('sigp_dark_mode') !== 'false';
+      document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+    })();
+  </script>
+  <style>
+    :root, [data-theme="dark"] {
+      --bg: #0a0f1e; --card: #111827; --card-shadow: rgba(0,0,0,0.5);
+      --border: #1e2a45; --input: #0d1526;
+      --text: #ffffff; --text-muted: #8a9bbf; --text-dim: #5a6a8a; --text-dimmer: #3a4a6a;
+      --btn-top-bg: #151c30; --divider: #1e2a45; --footer: #2a3555;
+    }
+    [data-theme="light"] {
+      --bg: #f0f4ff; --card: #ffffff; --card-shadow: rgba(0,0,0,0.1);
+      --border: #dde3f0; --input: #f5f7ff;
+      --text: #0d1220; --text-muted: #4a5568; --text-dim: #6b7280; --text-dimmer: #9ca3af;
+      --btn-top-bg: #eef2ff; --divider: #dde3f0; --footer: #9ca3af;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', sans-serif; background: var(--bg); min-height: 100vh; display: flex; align-items: center; justify-content: center; transition: background 0.3s; }
+    .page-wrapper { width: 100%; max-width: 420px; padding: 1.5rem; }
+    .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+    .btn-top { background: var(--btn-top-bg); border: 1px solid var(--border); border-radius: 20px; padding: 6px 14px; font-size: 12px; color: var(--text-muted); cursor: pointer; transition: all 0.2s; }
+    .btn-top:hover { background: #1a6bff; color: white; border-color: #1a6bff; }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 18px; padding: 2.5rem 2rem; box-shadow: 0 8px 40px var(--card-shadow); transition: background 0.3s, border-color 0.3s; }
+    .logo-area { text-align: center; margin-bottom: 2rem; }
+    .logo-icon { width: 68px; height: 68px; background: linear-gradient(135deg, #1a6bff, #0d4fd6); border-radius: 18px; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; box-shadow: 0 4px 20px rgba(26,107,255,0.4); }
+    .logo-title { font-size: 22px; font-weight: 700; color: var(--text); letter-spacing: 1px; }
+    .logo-sub { font-size: 12px; color: var(--text-dim); margin-top: 5px; }
+    .alert { padding: 10px 14px; border-radius: 8px; font-size: 13px; background: rgba(220,53,69,0.15); color: #ff6b7a; border: 1px solid rgba(220,53,69,0.3); margin-bottom: 1rem; }
+    .field { margin-bottom: 1.2rem; }
+    .field label { display: block; font-size: 13px; font-weight: 500; color: var(--text-muted); margin-bottom: 7px; }
+    .field input { width: 100%; padding: 12px 14px; border: 1px solid var(--border); border-radius: 10px; font-size: 14px; color: var(--text); background: var(--input); outline: none; transition: border-color 0.2s, box-shadow 0.2s; }
+    .field input::placeholder { color: var(--text-dimmer); }
+    .field input:focus { border-color: #1a6bff; box-shadow: 0 0 0 3px rgba(26,107,255,0.15); }
+    .btn-login { width: 100%; padding: 13px; background: #1a6bff; border: none; border-radius: 10px; color: #ffffff; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 0.5rem; transition: background 0.2s, transform 0.1s, box-shadow 0.2s; }
+    .btn-login:hover { background: #0d4fd6; box-shadow: 0 4px 20px rgba(26,107,255,0.4); }
+    .btn-login:active { transform: scale(0.98); }
+    .divider { height: 1px; background: var(--divider); margin: 1.5rem 0; }
+    .footer-info { text-align: center; font-size: 12px; color: var(--text-dim); display: flex; align-items: center; justify-content: center; gap: 7px; }
+    .dot { width: 6px; height: 6px; border-radius: 50%; background: #1a6bff; display: inline-block; }
+    .page-footer { text-align: center; margin-top: 1.5rem; font-size: 11px; color: var(--footer); }
+  </style>
+</head>
+<body>
+  <div class="page-wrapper">
+    <div class="top-bar">
+      <button class="btn-top">🌐 FR</button>
+      <button class="btn-top" id="themeBtn" onclick="toggleTheme()">☀️ Light mode</button>
+    </div>
+
+    <div class="card">
+      <div class="logo-area">
+        <div class="logo-icon">
+          <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+            <rect x="4" y="8" width="28" height="3.5" rx="1.75" fill="white"/>
+            <rect x="4" y="16" width="20" height="3.5" rx="1.75" fill="white" opacity="0.7"/>
+            <rect x="4" y="24" width="24" height="3.5" rx="1.75" fill="white" opacity="0.5"/>
+            <circle cx="30" cy="26" r="6" fill="none" stroke="white" stroke-width="1.5"/>
+            <path d="M27.5 26l2 2 3.5-3.5" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="logo-title">SIGP — RH</div>
+        <div class="logo-sub">Système de Gestion du Personnel</div>
+      </div>
+
+      {% if messages %}
+        {% for message in messages %}
+        <div class="alert">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+
+      <form method="POST">
+        {% csrf_token %}
+        <div class="field">
+          <label>Nom d'utilisateur</label>
+          <input type="text" name="username" placeholder="Entrez votre identifiant" required autofocus />
+        </div>
+        <div class="field">
+          <label>Mot de passe</label>
+          <input type="password" name="password" placeholder="••••••••" required />
+        </div>
+        <button type="submit" class="btn-login">Se connecter →</button>
+      </form>
+
+      <div class="divider"></div>
+      <div class="footer-info">
+        <span class="dot"></span>
+        Accès sécurisé — Employés &amp; Administrateurs
+        <span class="dot"></span>
+      </div>
+    </div>
+
+    <div class="page-footer">SIGP &copy; 2026 — Tous droits réservés</div>
+  </div>
+
+  <script>
+    const btn = document.getElementById('themeBtn');
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    btn.textContent = isDark ? '☀️ Light mode' : '🌙 Dark mode';
+
+    function toggleTheme() {
+      const currentlyDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      const newTheme = currentlyDark ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', newTheme);
+      localStorage.setItem('sigp_dark_mode', newTheme === 'dark' ? 'true' : 'false');
+      btn.textContent = newTheme === 'dark' ? '☀️ Light mode' : '🌙 Dark mode';
+    }
+  </script>
+</body>
+</html>

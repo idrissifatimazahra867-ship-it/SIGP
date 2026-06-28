@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Rapport Congés</title>
+<style>
+  body { font-family: 'Segoe UI', sans-serif; color: #1a1a2e; margin: 0; padding: 20px; }
+  .header { text-align: center; margin-bottom: 30px; border-bottom: 3px solid #22c55e; padding-bottom: 15px; }
+  .header h1 { font-size: 24px; color: #16a34a; margin-bottom: 5px; }
+  .header p { font-size: 12px; color: #666; }
+  .meta { display: flex; justify-content: space-between; margin-bottom: 20px; font-size: 12px; color: #555; }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  thead { background: #16a34a; color: white; }
+  th { padding: 10px 8px; text-align: left; font-weight: 600; }
+  td { padding: 8px; border-bottom: 1px solid #e5e7eb; }
+  tr:nth-child(even) { background: #f0fdf4; }
+  .badge { padding: 3px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+  .badge-green { background: #dcfce7; color: #166534; }
+  .badge-red { background: #fee2e2; color: #991b1b; }
+  .badge-yellow { background: #fef9c3; color: #854d0e; }
+  .footer { margin-top: 30px; text-align: center; font-size: 11px; color: #999; border-top: 1px solid #e5e7eb; padding-top: 10px; }
+  .total { margin-top: 15px; text-align: right; font-size: 13px; font-weight: 600; color: #16a34a; }
+</style>
+</head>
+<body>
+  <div class="header">
+    <h1>📋 SIGP — Rapport de Congés</h1>
+    <p>Période : {{ date_debut }} → {{ date_fin }}</p>
+  </div>
+  <div class="meta">
+    <span>Généré le : {{ generated_at|date:"d/m/Y H:i" }}</span>
+    <span>Total demandes : {{ conges|length }}</span>
+  </div>
+  <table>
+    <thead>
+      <tr>
+        <th>Employé</th>
+        <th>Type de congé</th>
+        <th>Date début</th>
+        <th>Date fin</th>
+        <th>Jours</th>
+        <th>Statut</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for conge in conges %}
+<tr>
+    <td>{{ conge.employe.prenom }} {{ conge.employe.nom }}</td>
+    <td>{{ conge.typeConge.name }}</td>
+    <td>{{ conge.date_debut|date:"d/m/Y" }}</td>
+    <td>{{ conge.date_fin|date:"d/m/Y" }}</td>
+    <td>{{ conge.nbJours|default:"—" }}</td>
+    <td>
+      {% if conge.statut == 'valide' %}
+        <span class="badge badge-green">Validé</span>
+      {% elif conge.statut == 'refuse' %}
+        <span class="badge badge-red">Refusé</span>
+      {% else %}
+        <span class="badge badge-yellow">En attente</span>
+      {% endif %}
+    </td>
+</tr>
+        
+      {% empty %}
+      <tr><td colspan="6" style="text-align:center;color:#999;padding:20px;">Aucun congé trouvé</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <div class="total">Total : {{ conges|length }} demande(s)</div>
+  <div class="footer">SIGP — Système Intégré de Gestion du Personnel</div>
+</body>
+</html>

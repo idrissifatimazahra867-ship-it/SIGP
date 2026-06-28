@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SIGP — Dashboard Admin</title>
+  <script>
+    (function() {
+      const dark = localStorage.getItem('sigp_dark_mode') !== 'false';
+      document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+    })();
+  </script>
+  <style>
+    :root, [data-theme="dark"] {
+      --bg-main: #0a0f1e; --bg-sidebar: #0d1220; --bg-card: #111827;
+      --bg-input: #0d1526; --border: #1e2a45; --border-sub: #0f1828;
+      --text: #fff; --text-muted: #8a9bbf; --text-dim: #5a6a8a;
+      --text-dimmer: #3a4a6a; --nav-hover: #151c30; --accent: #1a6bff;
+    }
+    [data-theme="light"] {
+      --bg-main: #f0f4ff; --bg-sidebar: #ffffff; --bg-card: #ffffff;
+      --bg-input: #f5f7ff; --border: #dde3f0; --border-sub: #e8ecf5;
+      --text: #0d1220; --text-muted: #4a5568; --text-dim: #6b7280;
+      --text-dimmer: #9ca3af; --nav-hover: #f0f4ff; --accent: #1a6bff;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', sans-serif; background: var(--bg-main); color: var(--text); min-height: 100vh; display: flex; }
+
+    .sidebar { width: 240px; background: var(--bg-sidebar); border-right: 1px solid var(--border); display: flex; flex-direction: column; position: fixed; height: 100vh; z-index: 100; }
+    .sidebar-logo { padding: 1.5rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
+    .logo-icon { width: 40px; height: 40px; background: linear-gradient(135deg, #1a6bff, #0d4fd6); border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .logo-text { font-size: 16px; font-weight: 700; color: var(--text); letter-spacing: 0.5px; }
+    .logo-sub { font-size: 10px; color: var(--text-dim); }
+    .sidebar-nav { flex: 1; padding: 1rem 0; overflow-y: auto; }
+    .nav-section-title { font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-dimmer); padding: 0.8rem 1.5rem 0.4rem; }
+    .nav-item { display: flex; align-items: center; gap: 10px; padding: 0.7rem 1.5rem; color: var(--text-muted); text-decoration: none; font-size: 13.5px; transition: all 0.2s; border-left: 3px solid transparent; }
+    .nav-item:hover { background: var(--nav-hover); color: var(--text); border-left-color: var(--accent); }
+    .nav-item.active { background: rgba(26,107,255,0.1); color: var(--accent); border-left-color: var(--accent); font-weight: 500; }
+    .nav-icon { font-size: 16px; width: 20px; text-align: center; }
+     .sidebar-footer { padding: 1rem 1.5rem; border-top: 1px solid var(--border); }
+.user-info { display: flex; align-items: center; gap: 10px; }
+.user-details { flex: 1; min-width: 0; }
+.user-name { font-size: 13px; font-weight: 500; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.user-role { font-size: 11px; color: var(--text-dim); }
+.user-avatar { width: 34px; height: 34px; background: linear-gradient(135deg, #1a6bff, #0d4fd6); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600; color: white; flex-shrink: 0; }
+.btn-logout {
+  width: 32px; height: 32px; flex-shrink: 0;
+  background: rgba(220,53,69,0.08);
+  border: 1px solid rgba(220,53,69,0.15);
+  border-radius: 8px; color: #f87171;
+  display: flex; align-items: center; justify-content: center;
+  text-decoration: none; transition: all 0.2s;
+}
+.btn-logout:hover { background: rgba(220,53,69,0.2); border-color: rgba(220,53,69,0.3); color: #ff6b7a; transform: scale(1.05); }
+
+    .main { margin-left: 240px; flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+    .topbar { background: var(--bg-sidebar); border-bottom: 1px solid var(--border); padding: 0 2rem; height: 60px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; }
+    .topbar-title { font-size: 16px; font-weight: 600; color: var(--text); }
+    .topbar-sub { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
+    .content { padding: 2rem; flex: 1; }
+
+    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 2rem; }
+    .stat-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; padding: 1.3rem; transition: transform 0.2s; }
+    .stat-card:hover { transform: translateY(-2px); }
+    .stat-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+    .stat-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+    .stat-trend { font-size: 11px; padding: 3px 8px; border-radius: 20px; font-weight: 500; }
+    .trend-up { background: rgba(34,197,94,0.15); color: #4ade80; }
+    .trend-down { background: rgba(239,68,68,0.15); color: #f87171; }
+    .trend-neutral { background: rgba(234,179,8,0.15); color: #facc15; }
+    .stat-num { font-size: 28px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+    .stat-label { font-size: 13px; color: var(--text-dim); }
+
+    .sections-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+    .section-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+    .section-header { padding: 1rem 1.3rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .section-title { font-size: 14px; font-weight: 600; color: var(--text); }
+    .section-sub { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
+    .btn-small { padding: 5px 12px; background: rgba(26,107,255,0.1); border: 1px solid rgba(26,107,255,0.2); border-radius: 6px; color: var(--accent); font-size: 12px; cursor: pointer; text-decoration: none; transition: all 0.2s; }
+    .btn-small:hover { background: var(--accent); color: white; }
+
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th { padding: 0.8rem 1rem; text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-dimmer); border-bottom: 1px solid var(--border); background: var(--bg-sidebar); }
+    td { padding: 0.8rem 1rem; font-size: 13px; color: var(--text-muted); border-bottom: 1px solid var(--border-sub); }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: var(--bg-input); color: var(--text); }
+    .emp-name { color: var(--text); font-weight: 500; }
+    .emp-post { font-size: 11px; color: var(--text-dim); }
+
+    .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 500; }
+    .badge-present { background: rgba(34,197,94,0.15); color: #4ade80; }
+    .badge-absent { background: rgba(239,68,68,0.15); color: #f87171; }
+    .badge-pending { background: rgba(234,179,8,0.15); color: #facc15; }
+    .badge-approved { background: rgba(34,197,94,0.15); color: #4ade80; }
+    .badge-rejected { background: rgba(239,68,68,0.15); color: #f87171; }
+
+    @media print {
+      .sidebar, .topbar { display: none; }
+      .main { margin-left: 0; }
+      body { background: white; color: black; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon">
+        <svg width="22" height="22" viewBox="0 0 36 36" fill="none">
+          <rect x="4" y="8" width="28" height="3.5" rx="1.75" fill="white"/>
+          <rect x="4" y="16" width="20" height="3.5" rx="1.75" fill="white" opacity="0.7"/>
+          <rect x="4" y="24" width="24" height="3.5" rx="1.75" fill="white" opacity="0.5"/>
+        </svg>
+      </div>
+      <div><div class="logo-text">SIGP RH</div><div class="logo-sub">Administration</div></div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-title">Principal</div>
+      <a class="nav-item active" href="/dashboard/"><span class="nav-icon">📊</span> Accueil</a>
+      <div class="nav-section-title">Gestion</div>
+      <a class="nav-item" href="/employees/"><span class="nav-icon">👥</span> Employés</a>
+      <a class="nav-item" href="/pointage/"><span class="nav-icon">⏱️</span> Pointage</a>
+      <a class="nav-item" href="/leaves/"><span class="nav-icon">📅</span> Congés</a>
+      <div class="nav-section-title">Rapports</div>
+      <a class="nav-item" href="{% url 'rapports' %}"><span class="nav-icon">📈</span> Rapports</a>
+      <a class="nav-item" href="{% url 'parametres' %}"><span class="nav-icon">⚙️</span> Paramètres</a>
+    </nav>
+    <div class="sidebar-footer">
+  <div class="user-info">
+    <div class="user-avatar">A</div>
+    <div class="user-details">
+      <div class="user-name">{{ request.user.prenom }} {{ request.user.nom }}</div>
+      <div class="user-role">Administrateur</div>
+    </div>
+    <a href="/logout/" class="btn-logout" title="Se déconnecter">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+        <polyline points="16 17 21 12 16 7"/>
+        <line x1="21" y1="12" x2="9" y2="12"/>
+      </svg>
+    </a>
+  </div>
+</div>
+  </div>
+
+  <div class="main">
+    <div class="topbar">
+      <div>
+        <div class="topbar-title">Accueil Administrateur</div>
+        <div class="topbar-sub">Bienvenue, vue d'ensemble du personnel</div>
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-header">
+            <div class="stat-icon" style="background:rgba(26,107,255,0.15)">👥</div>
+            <span class="stat-trend trend-up">+2</span>
+          </div>
+          <div class="stat-num">{{ total_employes }}</div>
+          <div class="stat-label">Total Employés</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-header">
+            <div class="stat-icon" style="background:rgba(34,197,94,0.15)">✅</div>
+            <span class="stat-trend trend-up">92%</span>
+          </div>
+          <div class="stat-num">{{ presents }}</div>
+          <div class="stat-label">Présents Aujourd'hui</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-header">
+            <div class="stat-icon" style="background:rgba(234,179,8,0.15)">⏳</div>
+            <span class="stat-trend trend-neutral">3</span>
+          </div>
+          <div class="stat-num">{{ conges_attente }}</div>
+          <div class="stat-label">Congés en Attente</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-header">
+            <div class="stat-icon" style="background:rgba(239,68,68,0.15)">⚠️</div>
+            <span class="stat-trend trend-down">2</span>
+          </div>
+          <div class="stat-num">{{ retards }}</div>
+          <div class="stat-label">Retards Aujourd'hui</div>
+        </div>
+      </div>
+
+      <div class="sections-grid">
+        <div class="section-card">
+          <div class="section-header">
+            <div>
+              <div class="section-title">⏱️ Pointage Aujourd'hui</div>
+              <div class="section-sub">État en temps réel</div>
+            </div>
+            <a href="/pointage/" class="btn-small">Voir tout</a>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Employé</th><th>Arrivée</th><th>Statut</th></tr></thead>
+              <tbody>
+                {% for p in pointages_jour %}
+                <tr>
+                  <td>
+                    <div class="emp-name">{{ p.employe.prenom }} {{ p.employe.nom }}</div>
+                    <div class="emp-post">{{ p.employe.poste }}</div>
+                  </td>
+                  <td>{{ p.heure_entree|default:"--" }}</td>
+                  <td>
+                    {% if p.heure_entree %}<span class="badge badge-present">Présent</span>
+                    {% else %}<span class="badge badge-absent">Absent</span>{% endif %}
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="section-card">
+          <div class="section-header">
+            <div>
+              <div class="section-title">📅 Demandes de Congés</div>
+              <div class="section-sub">En attente de validation</div>
+            </div>
+            <a href="/leaves/" class="btn-small">Gérer</a>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Employé</th><th>Type</th><th>Statut</th></tr></thead>
+              <tbody>
+                {% for c in conges %}
+                <tr>
+                  <td><div class="emp-name">{{ c.employe.prenom }} {{ c.employe.nom }}</div></td>
+                  <td>{{ c.typeConge }}</td>
+                  <td>
+                    {% if c.statut == 'en_attente' %}<span class="badge badge-pending">En attente</span>
+                    {% elif c.statut == 'valide' %}<span class="badge badge-approved">Approuvé</span>
+                    {% elif c.statut == 'refuse' %}<span class="badge badge-rejected">Refusé</span>{% endif %}
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

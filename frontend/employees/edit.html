@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SIGP — Modifier Employé</title>
+  <script>
+    (function() {
+      const dark = localStorage.getItem('sigp_dark_mode') !== 'false';
+      document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+    })();
+  </script>
+  <style>
+    :root, [data-theme="dark"] {
+      --bg-main: #0a0f1e; --bg-sidebar: #0d1220; --bg-card: #111827;
+      --bg-input: #0d1526; --border: #1e2a45; --border-sub: #0f1828;
+      --text: #fff; --text-muted: #8a9bbf; --text-dim: #5a6a8a;
+      --text-dimmer: #3a4a6a; --nav-hover: #151c30; --accent: #1a6bff;
+    }
+    [data-theme="light"] {
+      --bg-main: #f0f4ff; --bg-sidebar: #ffffff; --bg-card: #ffffff;
+      --bg-input: #f5f7ff; --border: #dde3f0; --border-sub: #e8ecf5;
+      --text: #0d1220; --text-muted: #4a5568; --text-dim: #6b7280;
+      --text-dimmer: #9ca3af; --nav-hover: #f0f4ff; --accent: #1a6bff;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', sans-serif; background: var(--bg-main); color: var(--text); min-height: 100vh; display: flex; }
+
+    .sidebar { width: 240px; background: var(--bg-sidebar); border-right: 1px solid var(--border); display: flex; flex-direction: column; position: fixed; height: 100vh; z-index: 100; }
+    .sidebar-logo { padding: 1.5rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
+    .logo-icon { width: 40px; height: 40px; background: linear-gradient(135deg, #1a6bff, #0d4fd6); border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .logo-text { font-size: 16px; font-weight: 700; color: var(--text); }
+    .logo-sub { font-size: 10px; color: var(--text-dim); }
+    .sidebar-nav { flex: 1; padding: 1rem 0; overflow-y: auto; }
+    .nav-section-title { font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-dimmer); padding: 0.8rem 1.5rem 0.4rem; }
+    .nav-item { display: flex; align-items: center; gap: 10px; padding: 0.7rem 1.5rem; color: var(--text-muted); text-decoration: none; font-size: 13.5px; transition: all 0.2s; border-left: 3px solid transparent; }
+    .nav-item:hover { background: var(--nav-hover); color: var(--text); border-left-color: var(--accent); }
+    .nav-item.active { background: rgba(26,107,255,0.1); color: var(--accent); border-left-color: var(--accent); font-weight: 500; }
+    .nav-icon { font-size: 16px; width: 20px; text-align: center; }
+     .sidebar-footer { padding: 1rem 1.5rem; border-top: 1px solid var(--border); }
+.user-info { display: flex; align-items: center; gap: 10px; }
+.user-details { flex: 1; min-width: 0; }
+.user-name { font-size: 13px; font-weight: 500; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.user-role { font-size: 11px; color: var(--text-dim); }
+.user-avatar { width: 34px; height: 34px; background: linear-gradient(135deg, #1a6bff, #0d4fd6); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600; color: white; flex-shrink: 0; }
+.btn-logout {
+  width: 32px; height: 32px; flex-shrink: 0;
+  background: rgba(220,53,69,0.08);
+  border: 1px solid rgba(220,53,69,0.15);
+  border-radius: 8px; color: #f87171;
+  display: flex; align-items: center; justify-content: center;
+  text-decoration: none; transition: all 0.2s;
+}
+.btn-logout:hover { background: rgba(220,53,69,0.2); border-color: rgba(220,53,69,0.3); color: #ff6b7a; transform: scale(1.05); }
+
+    .main { margin-left: 240px; flex: 1; display: flex; flex-direction: column; }
+    .topbar { background: var(--bg-sidebar); border-bottom: 1px solid var(--border); padding: 0 2rem; height: 60px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; }
+    .topbar-title { font-size: 16px; font-weight: 600; color: var(--text); }
+    .topbar-sub { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
+    .content { padding: 2rem; flex: 1; }
+
+    .form-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 2rem; max-width: 800px; }
+    .form-section { margin-bottom: 2rem; }
+    .form-section-title { font-size: 14px; font-weight: 600; color: var(--accent); margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border); }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-group.full { grid-column: 1 / -1; }
+    label { font-size: 12px; font-weight: 500; color: var(--text-muted); }
+    input, select, textarea { padding: 10px 14px; background: var(--bg-input); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 13px; outline: none; transition: border-color 0.2s; font-family: 'Segoe UI', sans-serif; width: 100%; }
+    input::placeholder, textarea::placeholder { color: var(--text-dimmer); }
+    input:focus, select:focus, textarea:focus { border-color: var(--accent); }
+    select option { background: var(--bg-input); }
+    textarea { resize: vertical; min-height: 80px; }
+    .form-actions { display: flex; gap: 1rem; margin-top: 1.5rem; }
+    .btn-save { padding: 11px 24px; background: var(--accent); border: none; border-radius: 8px; color: white; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s; }
+    .btn-save:hover { background: #0d4fd6; }
+    .btn-cancel { padding: 11px 24px; background: transparent; border: 1px solid var(--border); border-radius: 8px; color: var(--text-muted); font-size: 14px; cursor: pointer; text-decoration: none; display: flex; align-items: center; transition: all 0.2s; }
+    .btn-cancel:hover { background: var(--nav-hover); color: var(--text); }
+    .btn-delete { padding: 11px 24px; background: rgba(220,53,69,0.1); border: 1px solid rgba(220,53,69,0.2); border-radius: 8px; color: #ff6b7a; font-size: 14px; cursor: pointer; transition: all 0.2s; margin-left: auto; }
+    .btn-delete:hover { background: rgba(220,53,69,0.3); }
+  </style>
+</head>
+<body>
+
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon">
+        <svg width="22" height="22" viewBox="0 0 36 36" fill="none">
+          <rect x="4" y="8" width="28" height="3.5" rx="1.75" fill="white"/>
+          <rect x="4" y="16" width="20" height="3.5" rx="1.75" fill="white" opacity="0.7"/>
+          <rect x="4" y="24" width="24" height="3.5" rx="1.75" fill="white" opacity="0.5"/>
+        </svg>
+      </div>
+      <div><div class="logo-text">SIGP RH</div><div class="logo-sub">Administration</div></div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-title">Principal</div>
+      <a class="nav-item" href="/dashboard/"><span class="nav-icon">📊</span> Accueil</a>
+      <div class="nav-section-title">Gestion</div>
+      <a class="nav-item active" href="/employees/"><span class="nav-icon">👥</span> Employés</a>
+      <a class="nav-item" href="/pointage/"><span class="nav-icon">⏱️</span> Pointage</a>
+      <a class="nav-item" href="/leaves/"><span class="nav-icon">📅</span> Congés</a>
+      <div class="nav-section-title">Rapports</div>
+      <a class="nav-item" href="{% url 'rapports' %}"><span class="nav-icon">📈</span> Rapports</a>
+      <a class="nav-item" href="{% url 'parametres' %}"><span class="nav-icon">⚙️</span> Paramètres</a>
+    </nav>
+   <div class="sidebar-footer">
+  <div class="user-info">
+    <div class="user-avatar">A</div>
+    <div class="user-details">
+      <div class="user-name">{{ request.user.prenom }} {{ request.user.nom }}</div>
+      <div class="user-role">Administrateur</div>
+    </div>
+    <a href="/logout/" class="btn-logout" title="Se déconnecter">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+        <polyline points="16 17 21 12 16 7"/>
+        <line x1="21" y1="12" x2="9" y2="12"/>
+      </svg>
+    </a>
+  </div>
+</div>
+  </div>
+
+  <div class="main">
+    <div class="topbar">
+      <div>
+        <div class="topbar-title">✏️ Modifier Employé</div>
+        <div class="topbar-sub">Modifier les informations de l'employé</div>
+      </div>
+      <a href="/employees/" style="color:var(--text-muted);text-decoration:none;font-size:13px">← Retour à la liste</a>
+    </div>
+
+    <div class="content">
+      <div class="form-card">
+        <form method="POST" enctype="multipart/form-data">
+          {% csrf_token %}
+
+          <div class="form-section">
+            <div class="form-section-title">👤 Informations Personnelles</div>
+            <div class="form-grid">
+              <div class="form-group">
+                <label>Prénom *</label>
+                <input type="text" name="prenom" value="{{ employee.prenom }}" />
+              </div>
+              <div class="form-group">
+                <label>Nom *</label>
+                <input type="text" name="nom" value="{{ employee.nom }}" />
+              </div>
+              <div class="form-group">
+                <label>Email</label>
+                <input type="email" name="email" value="{{ employee.email }}" />
+              </div>
+              <div class="form-group">
+                <label>Téléphone</label>
+                <input type="text" name="telephone" value="{{ employee.telephone }}" />
+              </div>
+              <div class="form-group">
+                <label>Genre</label>
+                <select name="genre">
+                  <option value="M" {% if employee.genre == 'M' %}selected{% endif %}>Masculin</option>
+                  <option value="F" {% if employee.genre == 'F' %}selected{% endif %}>Féminin</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Date de naissance</label>
+                <input type="date" name="date_naissance" value="{{ employee.date_naissance|date:'Y-m-d' }}" />
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <div class="form-section-title">💼 Informations Professionnelles</div>
+            <div class="form-grid">
+              <div class="form-group">
+                <label>Matricule *</label>
+                <input type="text" name="employee_id" value="{{ employee.employee_id }}" required />
+              </div>
+              <div class="form-group">
+                <label>Poste *</label>
+                <input type="text" name="poste" value="{{ employee.poste }}" required />
+              </div>
+              <div class="form-group">
+                <label>Département</label>
+                <select name="departement">
+                  {% for dept in departments %}
+                    <option value="{{ dept.id }}" {% if employee.departement_id == dept.id %}selected{% endif %}>{{ dept.name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Date d'embauche</label>
+                <input type="date" name="date_embauche" value="{{ employee.date_embauche|date:'Y-m-d' }}" />
+              </div>
+              <div class="form-group">
+                <label>Statut</label>
+                <select name="statut">
+                  <option value="actif" {% if employee.statut == 'actif' %}selected{% endif %}>Actif</option>
+                  <option value="inactif" {% if employee.statut == 'inactif' %}selected{% endif %}>Inactif</option>
+                </select>
+              </div>
+              
+            </div>
+            
+          </div>
+          <div class="form-section">
+  <div class="form-section-title">🔐 Sécurité</div>
+  <div class="form-grid">
+    <div class="form-group">
+      <label>Nouveau mot de passe</label>
+      <input type="password" name="mot_de_passe" placeholder="Laisser vide pour ne pas changer" />
+    </div>
+    <div class="form-group">
+      <label>Confirmer le mot de passe</label>
+      <input type="password" id="confirm_mdp" placeholder="Confirmer le nouveau mot de passe" />
+    </div>
+  </div>
+</div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn-save">💾 Enregistrer</button>
+            <a href="/employees/" class="btn-cancel">Annuler</a>
+            <button type="button" class="btn-delete" onclick="confirmDelete()">🗑️ Supprimer</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function confirmDelete() {
+      if (confirm('Voulez-vous vraiment supprimer cet employé ?')) {
+        window.location.href = '/employees/{{ employee.id }}/delete/';
+      }
+      document.querySelector('form').addEventListener('submit', function(e) {
+  const mdp = document.querySelector('input[name="mot_de_passe"]').value;
+  const confirm = document.getElementById('confirm_mdp').value;
+  if (mdp && mdp !== confirm) {
+    e.preventDefault();
+    alert('Les mots de passe ne correspondent pas.');
+  }
+});
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SIGP — Demande de Congé</title>
+  <script>
+    (function() {
+      const dark = localStorage.getItem('sigp_dark_mode') !== 'false';
+      document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+    })();
+  </script>
+  <style>
+    :root, [data-theme="dark"] {
+      --bg-main: #0a0f1e; --bg-sidebar: #0d1220; --bg-card: #111827;
+      --bg-input: #0d1526; --border: #1e2a45; --border-sub: #0f1828;
+      --text: #fff; --text-muted: #8a9bbf; --text-dim: #5a6a8a;
+      --text-dimmer: #3a4a6a; --nav-hover: #151c30; --accent: #1a6bff;
+    }
+    [data-theme="light"] {
+      --bg-main: #f0f4ff; --bg-sidebar: #ffffff; --bg-card: #ffffff;
+      --bg-input: #f5f7ff; --border: #dde3f0; --border-sub: #e8ecf5;
+      --text: #0d1220; --text-muted: #4a5568; --text-dim: #6b7280;
+      --text-dimmer: #9ca3af; --nav-hover: #f0f4ff; --accent: #1a6bff;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', sans-serif; background: var(--bg-main); color: var(--text); min-height: 100vh; display: flex; }
+    .sidebar { width: 240px; background: var(--bg-sidebar); border-right: 1px solid var(--border); display: flex; flex-direction: column; position: fixed; height: 100vh; z-index: 100; }
+    .sidebar-logo { padding: 1.5rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
+    .logo-icon { width: 40px; height: 40px; background: linear-gradient(135deg, #1a6bff, #0d4fd6); border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .logo-text { font-size: 16px; font-weight: 700; color: var(--text); }
+    .logo-sub { font-size: 10px; color: var(--text-dim); }
+    .sidebar-nav { flex: 1; padding: 1rem 0; overflow-y: auto; }
+    .nav-section-title { font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-dimmer); padding: 0.8rem 1.5rem 0.4rem; }
+    .nav-item { display: flex; align-items: center; gap: 10px; padding: 0.7rem 1.5rem; color: var(--text-muted); text-decoration: none; font-size: 13.5px; transition: all 0.2s; border-left: 3px solid transparent; }
+    .nav-item:hover { background: var(--nav-hover); color: var(--text); border-left-color: var(--accent); }
+    .nav-item.active { background: rgba(26,107,255,0.1); color: var(--accent); border-left-color: var(--accent); font-weight: 500; }
+    .nav-icon { font-size: 16px; width: 20px; text-align: center; }
+    .sidebar-footer { padding: 1rem 1.5rem; border-top: 1px solid var(--border); }
+    .user-info { display: flex; align-items: center; gap: 10px; }
+    .user-details { flex: 1; min-width: 0; }
+    .user-name { font-size: 13px; font-weight: 500; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .user-role { font-size: 11px; color: var(--text-dim); }
+    .user-avatar { width: 34px; height: 34px; background: linear-gradient(135deg, #1a6bff, #0d4fd6); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600; color: white; flex-shrink: 0; }
+    .btn-logout { width: 32px; height: 32px; flex-shrink: 0; background: rgba(220,53,69,0.08); border: 1px solid rgba(220,53,69,0.15); border-radius: 8px; color: #f87171; display: flex; align-items: center; justify-content: center; text-decoration: none; transition: all 0.2s; }
+    .btn-logout:hover { background: rgba(220,53,69,0.2); border-color: rgba(220,53,69,0.3); color: #ff6b7a; transform: scale(1.05); }
+    .main { margin-left: 240px; flex: 1; display: flex; flex-direction: column; }
+    .topbar { background: var(--bg-sidebar); border-bottom: 1px solid var(--border); padding: 0 2rem; height: 60px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; }
+    .topbar-title { font-size: 16px; font-weight: 600; color: var(--text); }
+    .topbar-sub { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
+    .content { padding: 2rem; flex: 1; }
+    .solde-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1.5rem; }
+    .solde-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 1rem 1.2rem; display: flex; align-items: center; gap: 12px; }
+    .solde-icon { width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+    .solde-num { font-size: 20px; font-weight: 700; color: var(--text); }
+    .solde-label { font-size: 11px; color: var(--text-dim); }
+    .form-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 2rem; max-width: 600px; width: 100%; margin: 0 auto; }
+    .form-section-title { font-size: 14px; font-weight: 600; color: var(--accent); margin-bottom: 1.2rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border); }
+    .form-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 1.1rem; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    label { font-size: 12px; font-weight: 500; color: var(--text-muted); }
+    input, select, textarea { padding: 10px 14px; background: var(--bg-input); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 13px; outline: none; transition: border-color 0.2s; font-family: 'Segoe UI', sans-serif; width: 100%; }
+    input:focus, select:focus, textarea:focus { border-color: var(--accent); }
+    select option { background: var(--bg-input); }
+    textarea { resize: vertical; min-height: 100px; }
+    .nb-jours { border-radius: 8px; padding: 10px 14px; font-size: 14px; font-weight: 600; text-align: center; margin-bottom: 1rem; transition: all 0.3s; background: rgba(26,107,255,0.1); border: 1px solid rgba(26,107,255,0.2); color: var(--accent); }
+    .nb-jours.error { background: rgba(239,68,68,0.1); border-color: rgba(239,68,68,0.3); color: #f87171; }
+    .nb-jours.success { background: rgba(34,197,94,0.1); border-color: rgba(34,197,94,0.3); color: #4ade80; }
+    .alert-error { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); border-radius: 8px; padding: 10px 14px; color: #f87171; font-size: 13px; margin-bottom: 1rem; }
+    .form-actions { display: flex; gap: 1rem; margin-top: 1.5rem; }
+    .btn-save { padding: 11px 24px; background: var(--accent); border: none; border-radius: 8px; color: white; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s; }
+    .btn-save:hover:not(:disabled) { background: #0d4fd6; }
+    .btn-save:disabled { opacity: 0.4; cursor: not-allowed; }
+    .btn-cancel { padding: 11px 24px; background: transparent; border: 1px solid var(--border); border-radius: 8px; color: var(--text-muted); font-size: 14px; cursor: pointer; text-decoration: none; display: flex; align-items: center; transition: all 0.2s; }
+    .btn-cancel:hover { background: var(--nav-hover); color: var(--text); }
+  </style>
+</head>
+<body>
+
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon">
+        <svg width="22" height="22" viewBox="0 0 36 36" fill="none">
+          <rect x="4" y="8" width="28" height="3.5" rx="1.75" fill="white"/>
+          <rect x="4" y="16" width="20" height="3.5" rx="1.75" fill="white" opacity="0.7"/>
+          <rect x="4" y="24" width="24" height="3.5" rx="1.75" fill="white" opacity="0.5"/>
+        </svg>
+      </div>
+      <div><div class="logo-text">SIGP RH</div><div class="logo-sub">Espace Employé</div></div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-title">Mon Espace</div>
+      <a class="nav-item" href="/dashboard/employee/"><span class="nav-icon">🏠</span> Accueil</a>
+      <a class="nav-item" href="/pointage/employee/"><span class="nav-icon">⏱️</span> Mon Pointage</a>
+      <div class="nav-section-title">Congés</div>
+      <a class="nav-item" href="{% url 'employee-leaves' %}"><span class="nav-icon">📅</span> Mes Congés</a>
+      <a class="nav-item active" href="{% url 'leaves-new' %}"><span class="nav-icon">➕</span> Demander Congé</a>
+      <div class="nav-section-title">Historique</div>
+      <a class="nav-item" href="/pointage/history/"><span class="nav-icon">📋</span> Historique Pointage</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <div class="user-avatar">{{ request.user.prenom|first|upper|default:request.user.email|first|upper }}</div>
+        <div class="user-details">
+          <div class="user-name">{{ request.user.prenom }} {{ request.user.nom }}</div>
+          <div class="user-role">Employé</div>
+        </div>
+        <a href="/logout/" class="btn-logout" title="Se déconnecter">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+            <polyline points="16 17 21 12 16 7"/>
+            <line x1="21" y1="12" x2="9" y2="12"/>
+          </svg>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="topbar">
+      <div>
+        <div class="topbar-title">📅 Demande de Congé</div>
+        <div class="topbar-sub">Remplir votre demande</div>
+      </div>
+      <a href="{% url 'employee-leaves' %}" style="color:var(--text-muted);text-decoration:none;font-size:13px">← Mes congés</a>
+    </div>
+
+    <div class="content">
+
+      <div class="solde-cards">
+        <div class="solde-card">
+          <div class="solde-icon" style="background:rgba(26,107,255,0.15)">📋</div>
+          <div><div class="solde-num">18</div><div class="solde-label">Jours restants</div></div>
+        </div>
+        <div class="solde-card">
+          <div class="solde-icon" style="background:rgba(34,197,94,0.15)">✅</div>
+          <div><div class="solde-num">{{ stats.approved|default:0 }}</div><div class="solde-label">Congés pris</div></div>
+        </div>
+        <div class="solde-card">
+          <div class="solde-icon" style="background:rgba(234,179,8,0.15)">⏳</div>
+          <div><div class="solde-num">{{ stats.pending|default:0 }}</div><div class="solde-label">En attente</div></div>
+        </div>
+      </div>
+
+      <div class="form-card">
+        <div class="form-section-title">📝 Nouvelle Demande de Congé</div>
+
+        
+
+        <form method="POST">
+          {% csrf_token %}
+          <div class="form-group">
+            <label>Type de congé *</label>
+            <select name="leave_type" id="leave_type" required onchange="calcDays()">
+              <option value="" data-max-days="0">— Choisir le type —</option>
+              {% for lt in leave_types %}
+              <option value="{{ lt.id }}" data-max-days="{{ lt.max_days }}">
+                {{ lt.name }} ({{ lt.max_days }} jours max)
+              </option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Date de début *</label>
+              <input type="date" name="start_date" id="start_date" required onchange="calcDays()" />
+            </div>
+            <div class="form-group">
+              <label>Date de fin *</label>
+              <input type="date" name="end_date" id="end_date" required onchange="calcDays()" />
+            </div>
+          </div>
+          <div class="nb-jours" id="nbJours">Sélectionnez les dates pour voir le nombre de jours</div>
+          <div class="form-group">
+            <label>Motif *</label>
+            <textarea name="reason" placeholder="Décrivez le motif de votre demande..." required></textarea>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn-save" id="btn-submit">📤 Envoyer la demande</button>
+            <a href="{% url 'employee-leaves' %}" class="btn-cancel">Annuler</a>
+          </div>
+        </form>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    function calcDays() {
+      const start = document.getElementById('start_date').value;
+      const end = document.getElementById('end_date').value;
+      const select = document.getElementById('leave_type');
+      const nbJoursEl = document.getElementById('nbJours');
+      const btnSubmit = document.getElementById('btn-submit');
+      const selectedOption = select.options[select.selectedIndex];
+      const maxDays = parseInt(selectedOption?.dataset?.maxDays || 0);
+
+      // reset
+      nbJoursEl.className = 'nb-jours';
+      btnSubmit.disabled = false;
+
+      if (!start || !end) return;
+
+      const d1 = new Date(start);
+      const d2 = new Date(end);
+      const diff = Math.ceil((d2 - d1) / (1000 * 60 * 60 * 24)) + 1;
+
+      // date de fin avant date de début
+      if (diff <= 0) {
+        nbJoursEl.textContent = '⚠️ La date de fin doit être après la date de début';
+        nbJoursEl.classList.add('error');
+        btnSubmit.disabled = true;
+        return;
+      }
+
+      // dépasse le max
+      if (maxDays > 0 && diff > maxDays) {
+        nbJoursEl.textContent = `⚠️ Durée : ${diff} jour(s) — Maximum autorisé : ${maxDays} jours`;
+        nbJoursEl.classList.add('error');
+        btnSubmit.disabled = true;
+        return;
+      }
+
+      // tout est ok
+      nbJoursEl.textContent = `📅 Durée : ${diff} jour(s)`;
+      nbJoursEl.classList.add('success');
+      btnSubmit.disabled = false;
+    }
+  </script>
+</body>
+</html>

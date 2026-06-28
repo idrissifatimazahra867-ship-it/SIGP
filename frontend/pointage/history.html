@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="{{ sys_theme }}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SIGP — Paramètres</title>
+  <style>
+    :root, [data-theme="dark"] {
+      --bg-main: #0a0f1e;
+      --bg-sidebar: #0d1220;
+      --bg-card: #111827;
+      --bg-input: #0d1526;
+      --border: #1e2a45;
+      --border-sub: #0f1828;
+      --text: #fff;
+      --text-muted: #8a9bbf;
+      --text-dim: #5a6a8a;
+      --text-dimmer: #3a4a6a;
+      --nav-hover: #151c30;
+      --accent: #1a6bff;
+    }
+    [data-theme="light"] {
+      --bg-main: #f0f4ff;
+      --bg-sidebar: #ffffff;
+      --bg-card: #ffffff;
+      --bg-input: #f5f7ff;
+      --border: #dde3f0;
+      --border-sub: #e8ecf5;
+      --text: #0d1220;
+      --text-muted: #4a5568;
+      --text-dim: #6b7280;
+      --text-dimmer: #9ca3af;
+      --nav-hover: #f0f4ff;
+      --accent: #1a6bff;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', sans-serif; background: var(--bg-main); color: var(--text); min-height: 100vh; display: flex; }
+
+    .sidebar { width: 240px; background: var(--bg-sidebar); border-right: 1px solid var(--border); display: flex; flex-direction: column; position: fixed; height: 100vh; z-index: 100; }
+    .sidebar-logo { padding: 1.5rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
+    .logo-icon { width: 40px; height: 40px; background: linear-gradient(135deg, #1a6bff, #0d4fd6); border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .logo-text { font-size: 16px; font-weight: 700; color: var(--text); }
+    .logo-sub { font-size: 10px; color: var(--text-dim); }
+    .sidebar-nav { flex: 1; padding: 1rem 0; overflow-y: auto; }
+    .nav-section-title { font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-dimmer); padding: 0.8rem 1.5rem 0.4rem; }
+    .nav-item { display: flex; align-items: center; gap: 10px; padding: 0.7rem 1.5rem; color: var(--text-muted); text-decoration: none; font-size: 13.5px; transition: all 0.2s; border-left: 3px solid transparent; }
+    .nav-item:hover { background: var(--nav-hover); color: var(--text); border-left-color: var(--accent); }
+    .nav-item.active { background: rgba(26,107,255,0.1); color: var(--accent); border-left-color: var(--accent); font-weight: 500; }
+    .nav-icon { font-size: 16px; width: 20px; text-align: center; }
+   .sidebar-footer { padding: 1rem 1.5rem; border-top: 1px solid var(--border); }
+.user-info { display: flex; align-items: center; gap: 10px; }
+.user-details { flex: 1; min-width: 0; }
+.user-name { font-size: 13px; font-weight: 500; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .user-role { font-size: 11px; color: var(--text-dim); }
+.user-avatar { width: 34px; height: 34px; background: linear-gradient(135deg, #1a6bff, #0d4fd6); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600; color: white; flex-shrink: 0; }
+.btn-logout {
+  width: 32px; height: 32px; flex-shrink: 0;
+  background: rgba(220,53,69,0.08);
+  border: 1px solid rgba(220,53,69,0.15);
+  border-radius: 8px; color: #f87171;
+  display: flex; align-items: center; justify-content: center;
+  text-decoration: none; transition: all 0.2s;
+}
+.btn-logout:hover { background: rgba(220,53,69,0.2); border-color: rgba(220,53,69,0.3); color: #ff6b7a; transform: scale(1.05); }
+
+    .main { margin-left: 240px; flex: 1; display: flex; flex-direction: column; }
+    .topbar { background: var(--bg-sidebar); border-bottom: 1px solid var(--border); padding: 0 2rem; height: 60px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; }
+    .topbar-title { font-size: 16px; font-weight: 600; color: var(--text); }
+    .topbar-sub { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
+    .btn-print { padding: 8px 14px; background: rgba(26,107,255,0.1); border: 1px solid rgba(26,107,255,0.2); border-radius: 8px; color: var(--accent); font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 5px; transition: all 0.2s; }
+    .btn-print:hover { background: var(--accent); color: white; }
+
+    .content { padding: 2rem; flex: 1; }
+
+    /* TABS */
+    .tabs { display: flex; gap: 4px; margin-bottom: 1.5rem; background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 4px; width: fit-content; }
+    .tab { padding: 8px 18px; border-radius: 7px; font-size: 13px; cursor: pointer; color: var(--text-muted); transition: all 0.2s; border: none; background: transparent; }
+    .tab.active { background: var(--accent); color: white; font-weight: 500; }
+    .tab:hover:not(.active) { color: var(--text); background: var(--nav-hover); }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    /* HISTORIQUE */
+    .toolbar { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 1rem 1.2rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+    .filter-select { padding: 8px 12px; background: var(--bg-input); border: 1px solid var(--border); border-radius: 8px; color: var(--text-muted); font-size: 13px; outline: none; cursor: pointer; }
+    .filter-select option { background: var(--bg-input); }
+    .date-input { padding: 8px 12px; background: var(--bg-input); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 13px; outline: none; }
+    .date-input:focus { border-color: var(--accent); }
+    .table-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+    table { width: 100%; border-collapse: collapse; }
+    th { padding: 0.9rem 1rem; text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-dimmer); border-bottom: 1px solid var(--border); background: var(--bg-sidebar); }
+    td { padding: 0.85rem 1rem; font-size: 13px; color: var(--text-muted); border-bottom: 1px solid var(--border-sub); }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: var(--bg-input); }
+    .time-cell { font-family: 'Courier New', monospace; color: #4ade80; }
+    .time-missing { color: var(--text-dimmer); }
+    .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 500; }
+    .badge-present { background: rgba(34,197,94,0.15); color: #4ade80; }
+    .badge-absent { background: rgba(239,68,68,0.15); color: #f87171; }
+    .badge-late { background: rgba(234,179,8,0.15); color: #facc15; }
+
+    /* SYSTEME */
+    .section-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; margin-bottom: 1.5rem; }
+    .section-header { padding: 1rem 1.3rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .section-title { font-size: 14px; font-weight: 600; color: var(--text); }
+    .section-sub { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
+    .form-body { padding: 1.3rem; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    label { font-size: 12px; font-weight: 500; color: var(--text-muted); }
+    input, select, textarea { padding: 10px 14px; background: var(--bg-input); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 13px; outline: none; transition: border-color 0.2s; font-family: 'Segoe UI', sans-serif; width: 100%; }
+    input:focus, select:focus { border-color: var(--accent); }
+    select option { background: var(--bg-input); }
+    .btn-save { padding: 9px 20px; background: var(--accent); border: none; border-radius: 8px; color: white; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s; margin-top: 1rem; }
+    .btn-save:hover { background: #0d4fd6; }
+    .toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 0.9rem 0; border-bottom: 1px solid var(--border-sub); }
+    .toggle-row:last-child { border-bottom: none; }
+    .toggle-label { font-size: 13px; color: var(--text); }
+    .toggle-desc { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
+    .toggle { width: 42px; height: 24px; background: var(--border); border-radius: 12px; position: relative; cursor: pointer; transition: background 0.2s; border: none; flex-shrink: 0; }
+    .toggle.on { background: var(--accent); }
+    .toggle::after { content: ''; position: absolute; width: 18px; height: 18px; background: white; border-radius: 50%; top: 3px; left: 3px; transition: left 0.2s; }
+    .toggle.on::after { left: 21px; }
+
+    @media print {
+      .sidebar, .topbar, .toolbar, .tabs { display: none; }
+      .main { margin-left: 0; }
+      body { background: white; color: black; }
+      .table-card { border: 1px solid #ccc; }
+      th, td { color: black; border-color: #ccc; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon">
+        <svg width="22" height="22" viewBox="0 0 36 36" fill="none">
+          <rect x="4" y="8" width="28" height="3.5" rx="1.75" fill="white"/>
+          <rect x="4" y="16" width="20" height="3.5" rx="1.75" fill="white" opacity="0.7"/>
+          <rect x="4" y="24" width="24" height="3.5" rx="1.75" fill="white" opacity="0.5"/>
+        </svg>
+      </div>
+      <div><div class="logo-text">SIGP RH</div><div class="logo-sub">Espace Employé</div></div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-title">Mon Espace</div>
+      <a class="nav-item" href="/dashboard/employee/"><span class="nav-icon">🏠</span> Accueil</a>
+      <a class="nav-item" href="/pointage/employee/"><span class="nav-icon">⏱️</span> Mon Pointage</a>
+      <div class="nav-section-title">Congés</div>
+      <a class="nav-item" href="{% url 'employee-leaves' %}"><span class="nav-icon">📅</span> Mes Congés</a>
+      <a class="nav-item" href="/leaves/new/"><span class="nav-icon">➕</span> Demander Congé</a>
+      <div class="nav-section-title">Historique</div>
+      <a class="nav-item active" href="/pointage/history/"><span class="nav-icon">⚙️</span> Paramètres</a>
+    </nav>
+    <div class="sidebar-footer">
+  <div class="user-info">
+    <div class="user-avatar">{{ request.user.prenom|first|upper|default:request.user.email|first|upper }}</div>
+    <div class="user-details">
+      <div class="user-name">{{ request.user.prenom }} {{ request.user.nom }}</div>
+      <div class="user-role">Employé</div>
+    </div>
+    <a href="/logout/" class="btn-logout" title="Se déconnecter">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+        <polyline points="16 17 21 12 16 7"/>
+        <line x1="21" y1="12" x2="9" y2="12"/>
+      </svg>
+    </a>
+  </div>
+</div>
+  </div>
+
+  <div class="main">
+    <div class="topbar">
+      <div>
+        <div class="topbar-title">⚙️ Paramètres</div>
+        <div class="topbar-sub">Historique & Configuration</div>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <div class="tabs">
+        <button class="tab active" onclick="showTab('historique', this)">📋 Historique Pointage</button>
+        <button class="tab" onclick="showTab('systeme', this)">🔧 Système</button>
+      </div>
+
+      <!-- TAB: HISTORIQUE POINTAGE -->
+      <div class="tab-content active" id="tab-historique">
+  <form method="GET" class="toolbar">
+    <input type="hidden" name="tab" value="historique">
+    <select class="filter-select" name="periode" onchange="this.form.submit()">
+      <option value="mois" {% if request.GET.periode == 'mois' or not request.GET.periode %}selected{% endif %}>Ce mois</option>
+      <option value="mois_dernier" {% if request.GET.periode == 'mois_dernier' %}selected{% endif %}>Mois dernier</option>
+      <option value="3mois" {% if request.GET.periode == '3mois' %}selected{% endif %}>3 derniers mois</option>
+      <option value="custom" {% if request.GET.periode == 'custom' %}selected{% endif %}>Personnalisé</option>
+    </select>
+    <input type="date" class="date-input" name="date_debut" value="{{ request.GET.date_debut }}" onchange="this.form.submit()"/>
+    <span style="color:var(--text-dim);font-size:13px">→</span>
+    <input type="date" class="date-input" name="date_fin" value="{{ request.GET.date_fin }}" onchange="this.form.submit()"/>
+  </form>
+
+        <div class="table-card">
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Arrivée</th>
+                <th>Départ Pause</th>
+                <th>Retour Pause</th>
+                <th>Départ Final</th>
+                <th>Heures</th>
+                <th>Statut</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for p in pointages %}
+              <tr>
+                <td style="color:var(--text);font-weight:500">{{ p.date }}</td>
+                <td class="{% if p.arrivee %}time-cell{% else %}time-missing{% endif %}">{{ p.arrivee|default:"—" }}</td>
+                <td class="{% if p.depart_pause %}time-cell{% else %}time-missing{% endif %}">{{ p.depart_pause|default:"—" }}</td>
+                <td class="{% if p.retour_pause %}time-cell{% else %}time-missing{% endif %}">{{ p.retour_pause|default:"—" }}</td>
+                <td class="{% if p.depart_final %}time-cell{% else %}time-missing{% endif %}">{{ p.depart_final|default:"—" }}</td>
+                <td class="time-cell">{{ p.total_hours|default:"—" }}</td>
+                <td>
+                  {% if p.status == 'present' %}<span class="badge badge-present">Présent</span>
+                  {% elif p.status == 'late' %}<span class="badge badge-late">Retard</span>
+                  {% else %}<span class="badge badge-absent">Absent</span>{% endif %}
+                </td>
+              </tr>
+              {% empty %}
+              <tr><td colspan="7" style="text-align:center;padding:3rem;color:var(--text-dimmer)">Aucun historique disponible</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- TAB: SYSTEME -->
+      <div class="tab-content" id="tab-systeme">
+        <div class="section-card">
+          <div class="section-header">
+            <div>
+              <div class="section-title">🔧 Paramètres Système</div>
+              <div class="section-sub">Configuration de votre espace</div>
+            </div>
+          </div>
+          <div class="form-body">
+            <input type="hidden" id="dark_mode_input" value="">
+
+            <div class="toggle-row">
+              <div>
+                <div class="toggle-label">🌙 Dark Mode</div>
+                <div class="toggle-desc">Activer le mode sombre</div>
+              </div>
+              <button type="button" class="toggle" id="darkToggle" onclick="toggleDark(this)"></button>
+            </div>
+
+            <div style="margin-top:1.5rem;padding-top:1rem;border-top:1px solid var(--border)">
+              <div class="form-grid">
+                <div class="form-group">
+                  <label>Langue par défaut</label>
+                  <select><option value="fr">Français</option></select>
+                </div>
+                <div class="form-group">
+                  <label>Timezone</label>
+                  <select>
+                    <option value="Africa/Casablanca">Africa/Casablanca</option>
+                    <option value="Europe/Paris">Europe/Paris</option>
+                  </select>
+                </div>
+              </div>
+              <button type="button" class="btn-save" onclick="saveSys()">💾 Enregistrer</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // ── Anti-flash dark mode ──────────────────────────────────────────────────
+    (function() {
+      const dark = localStorage.getItem('sigp_dark_mode') !== 'false';
+      document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+    })();
+
+    // ── Tabs ──────────────────────────────────────────────────────────────────
+    function showTab(tab, el) {
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.getElementById('tab-'+tab).classList.add('active');
+      el.classList.add('active');
+    }
+
+    // ── Dark Mode ─────────────────────────────────────────────────────────────
+    document.addEventListener('DOMContentLoaded', () => {
+      const isDark = localStorage.getItem('sigp_dark_mode') !== 'false';
+      document.getElementById('darkToggle').classList.toggle('on', isDark);
+    });
+
+    function toggleDark(btn) {
+      btn.classList.toggle('on');
+      const isDark = btn.classList.contains('on');
+      localStorage.setItem('sigp_dark_mode', isDark);
+      document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+    }
+
+    function saveSys() {
+      const isDark = document.getElementById('darkToggle').classList.contains('on');
+      localStorage.setItem('sigp_dark_mode', isDark);
+      document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+      const t = document.createElement('div');
+      t.textContent = '✅ Paramètres enregistrés !';
+      t.style.cssText = 'position:fixed;bottom:2rem;right:2rem;background:#1a6bff;color:white;padding:10px 20px;border-radius:10px;font-size:13px;z-index:9999';
+      document.body.appendChild(t);
+      setTimeout(() => t.remove(), 3000);
+    }
+  </script>
+
+</body>
+</html>
