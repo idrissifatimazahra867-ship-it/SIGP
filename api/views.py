@@ -132,11 +132,10 @@ class LoginHTMLView(View):
     """
     Gère la page de connexion HTML.
     GET  → affiche login.html
-    POST → appelle l'API JWT, stocke les tokens en session, redirige
+    POST → authentifie directement via le serializer JWT, stocke en session, redirige
     """
 
     def get(self, request):
-        # Si déjà connecté, rediriger directement
         if request.session.get('access_token'):
             user = request.session.get('user', {})
             if user.get('is_admin'):
@@ -145,9 +144,7 @@ class LoginHTMLView(View):
         return render(request, 'login.html')
 
     def post(self, request):
-        import requests as http_requests
-
-        email    = request.POST.get('username')   # champ name="username" dans le HTML
+        email    = request.POST.get('username')
         password = request.POST.get('password')
 
         if not email or not password:
@@ -155,33 +152,22 @@ class LoginHTMLView(View):
             return render(request, 'login.html')
 
         try:
-            response = http_requests.post(
-                request.build_absolute_uri('/api/token/'),
-                json={'email': email, 'password': password},
-                timeout=5
-            )
+            # ── Appel direct au serializer, sans requête HTTP ──
+            serializer = CustomTokenSerializer(data={'email': email, 'password': password})
+            serializer.is_valid(raise_exception=True)
+            data = serializer.validated_data
 
-            if response.status_code == 200:
-                data = response.json()
+            request.session['access_token']  = str(data['access'])
+            request.session['refresh_token'] = str(data['refresh'])
+            request.session['user']          = data['employe']
 
-                # ── Stocker les tokens et infos user en session ──
-                request.session['access_token']  = data['access']
-                request.session['refresh_token'] = data['refresh']
-                request.session['user']          = data['employe']
-
-                # ── Redirection selon le rôle ──
-                if data['employe']['is_admin']:
-                    return redirect('/dashboard/')
-                else:
-                    return redirect('/dashboard/employee/')
-
-            elif response.status_code == 401:
-                messages.error(request, 'Email ou mot de passe incorrect.')
+            if data['employe']['is_admin']:
+                return redirect('/dashboard/')
             else:
-                messages.error(request, 'Erreur lors de la connexion. Réessayez.')
+                return redirect('/dashboard/employee/')
 
         except Exception as e:
-            messages.error(request, 'Impossible de joindre le serveur. Vérifiez votre connexion.')
+            messages.error(request, 'Email ou mot de passe incorrect.')
 
         return render(request, 'login.html')
 
